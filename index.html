@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Meindl FahrerApp</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #f97316;
+  --orange-light: #fff7ed;
+  --orange-border: #fed7aa;
+  --green: #16a34a;
+  --green-light: #f0fdf4;
+  --green-border: #bbf7d0;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --red-border: #fecaca;
+  --blue: #2563eb;
+  --blue-light: #eff6ff;
+  --blue-border: #bfdbfe;
+  --yellow: #ca8a04;
+  --yellow-light: #fefce8;
+  --yellow-border: #fde68a;
+  --gray: #6b7280;
+  --gray-light: #f9fafb;
+  --gray-border: #e5e7eb;
+  --text: #111827;
+  --text2: #6b7280;
+  --text3: #9ca3af;
+  --bg: #f3f4f6;
+  --white: #ffffff;
+  --font: 'Inter', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+  --radius: 12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { background:var(--bg); color:var(--text); font-family:var(--font); min-height:100vh; font-size:15px; }
+
+/* SCREENS */
+.screen { display:none; position:fixed; inset:0; overflow-y:auto; background:var(--bg); z-index:1; }
+.screen.active { display:block; animation:fadeIn 0.2s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+/* LANG SWITCHER */
+.lang-bar {
+  position:fixed; top:0; right:0; z-index:999;
+  display:flex; gap:2px; padding:8px;
+}
+.lang-btn {
+  padding:4px 8px; border-radius:6px; border:1px solid var(--gray-border);
+  background:var(--white); font-size:11px; font-weight:700;
+  cursor:pointer; color:var(--text2); transition:all 0.15s;
+}
+.lang-btn.active { background:var(--orange); color:#fff; border-color:var(--orange); }
+
+/* ===== LOGIN ===== */
+#s-login {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; min-height:100vh; padding:32px 20px;
+  background: linear-gradient(180deg, #fff 0%, var(--bg) 100%);
+}
+.login-logo { text-align:center; margin-bottom:40px; }
+.login-logo-mark {
+  width:80px; height:80px; border-radius:20px;
+  background:linear-gradient(135deg, var(--orange), #ea580c);
+  display:flex; align-items:center; justify-content:center;
+  font-size:38px; margin:0 auto 14px;
+  box-shadow: 0 8px 24px rgba(249,115,22,0.35);
+}
+.login-logo-name { font-size:28px; font-weight:900; color:var(--text); letter-spacing:-0.5px; }
+.login-logo-name span { color:var(--orange); }
+.login-logo-sub { font-size:13px; color:var(--text2); margin-top:4px; }
+
+.login-card {
+  background:var(--white); border-radius:20px;
+  padding:28px 24px; width:100%; max-width:340px;
+  box-shadow:var(--shadow-lg);
+}
+.login-lbl {
+  font-size:11px; font-weight:700; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--text2);
+  margin-bottom:14px; text-align:center;
+}
+.num-display {
+  background:var(--gray-light); border:2px solid var(--gray-border);
+  border-radius:12px; padding:14px;
+  font-family:var(--mono); font-size:34px; font-weight:700;
+  color:var(--orange); text-align:center; letter-spacing:8px;
+  margin-bottom:18px; min-height:64px;
+  display:flex; align-items:center; justify-content:center;
+  transition:border-color 0.2s;
+}
+.num-display.has-val { border-color:var(--orange-border); background:var(--orange-light); }
+.numpad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.nkey {
+  background:var(--gray-light); border:1px solid var(--gray-border);
+  border-radius:10px; padding:16px;
+  font-size:22px; font-weight:700; color:var(--text);
+  text-align:center; cursor:pointer; transition:all 0.1s;
+  user-select:none;
+}
+.nkey:active { background:var(--gray-border); transform:scale(0.94); }
+.nkey.empty { background:transparent; border-color:transparent; cursor:default; }
+.nkey.del { color:var(--gray); font-size:18px; }
+.nkey.ok {
+  background:var(--orange); border-color:var(--orange);
+  color:#fff; font-size:14px; font-weight:800;
+  box-shadow:0 4px 12px rgba(249,115,22,0.3);
+}
+.login-hint { font-size:11px; color:var(--text3); text-align:center; margin-top:14px; }
+
+/* ===== ABFAHRT ===== */
+#s-abfahrt {
+  min-height:100vh; padding:0;
+  background:var(--white);
+}
+.abfahrt-top {
+  background:var(--white); border-bottom:1px solid var(--gray-border);
+  padding:16px 20px;
+}
+.abfahrt-driver-card {
+  background:var(--gray-light); border:1px solid var(--gray-border);
+  border-radius:var(--radius); padding:14px 16px;
+  display:flex; align-items:center; gap:12px;
+}
+.abfahrt-driver-avatar {
+  width:44px; height:44px; border-radius:50%;
+  background:linear-gradient(135deg, var(--orange), #ea580c);
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; flex-shrink:0; color:#fff; font-weight:800;
+}
+.abfahrt-driver-name { font-size:17px; font-weight:800; }
+.abfahrt-driver-num { font-family:var(--mono); font-size:12px; color:var(--orange); margin-top:2px; }
+.abfahrt-title {
+  font-size:13px; font-weight:700; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--text2);
+  padding:20px 20px 12px;
+}
+.abfahrt-btn {
+  margin:0 16px 12px; border-radius:var(--radius); border:none;
+  padding:20px 18px; cursor:pointer; transition:all 0.15s;
+  display:flex; align-items:center; gap:16px; width:calc(100% - 32px);
+  text-align:left; font-family:var(--font);
+}
+.abfahrt-btn:active { transform:scale(0.98); }
+.abfahrt-btn-icon { font-size:36px; flex-shrink:0; }
+.abfahrt-btn-title { font-size:18px; font-weight:800; display:block; }
+.abfahrt-btn-sub { font-size:13px; font-weight:500; opacity:0.7; margin-top:2px; display:block; }
+.abtn-ok { background:var(--green-light); border:2px solid var(--green-border); color:var(--green); }
+.abtn-problem { background:var(--red-light); border:2px solid var(--red-border); color:var(--red); }
+
+/* Problem form */
+.problem-form {
+  display:none; margin:0 16px 16px;
+  background:var(--gray-light); border:1px solid var(--gray-border);
+  border-radius:var(--radius); padding:16px;
+}
+.problem-form.show { display:block; }
+.flbl { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text2); display:block; margin-bottom:6px; margin-top:14px; }
+.flbl:first-child { margin-top:0; }
+.finp { width:100%; background:var(--white); border:1px solid var(--gray-border); border-radius:8px; padding:11px 13px; color:var(--text); font-size:14px; font-family:var(--font); outline:none; transition:border-color 0.2s; }
+.finp:focus { border-color:var(--orange); }
+.finp::placeholder { color:var(--text3); }
+.voice-row { display:flex; gap:8px; align-items:flex-start; }
+.mic-btn {
+  flex-shrink:0; width:48px; height:48px; border-radius:10px; border:1px solid var(--orange-border);
+  background:var(--orange-light); cursor:pointer; font-size:22px;
+  display:flex; align-items:center; justify-content:center; transition:all 0.2s;
+}
+.mic-btn.recording { background:var(--red-light); border-color:var(--red-border); animation:recPulse 1s infinite; }
+@keyframes recPulse { 0%,100%{opacity:1}50%{opacity:0.5} }
+.translation-box {
+  display:none; margin-top:10px; padding:12px;
+  background:var(--green-light); border:1px solid var(--green-border);
+  border-radius:8px;
+}
+.translation-lbl { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--green); margin-bottom:6px; }
+.translation-text { font-size:14px; color:var(--green); font-weight:600; line-height:1.5; }
+.foto-zone {
+  border:2px dashed var(--gray-border); border-radius:10px;
+  padding:20px; text-align:center; cursor:pointer;
+  transition:all 0.2s; background:var(--white);
+}
+.foto-zone:active { border-color:var(--orange); background:var(--orange-light); }
+.foto-preview { width:100%; max-height:160px; object-fit:cover; border-radius:8px; display:none; }
+
+/* ===== AUFTRÄGE ===== */
+#s-orders { padding-bottom:0; }
+.orders-header {
+  background:var(--white); border-bottom:1px solid var(--gray-border);
+  padding:12px 16px; position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; justify-content:space-between;
+  box-shadow:var(--shadow);
+}
+.orders-brand { display:flex; align-items:center; gap:10px; }
+.orders-brand-mark {
+  width:34px; height:34px; border-radius:8px;
+  background:linear-gradient(135deg, var(--orange), #ea580c);
+  display:flex; align-items:center; justify-content:center; font-size:17px;
+}
+.orders-brand-name { font-size:17px; font-weight:900; }
+.orders-brand-name span { color:var(--orange); }
+.orders-right { display:flex; align-items:center; gap:8px; }
+.orders-driver-chip {
+  background:var(--gray-light); border:1px solid var(--gray-border);
+  border-radius:20px; padding:4px 10px;
+  font-size:12px; font-weight:700; color:var(--text);
+}
+.orders-time { font-family:var(--mono); font-size:13px; color:var(--orange); font-weight:600; }
+.orders-logout {
+  background:var(--red-light); border:1px solid var(--red-border);
+  border-radius:7px; padding:5px 10px;
+  font-size:11px; font-weight:700; color:var(--red); cursor:pointer;
+}
+
+/* ACTION PILLS */
+.action-pills { 
+  display:flex; gap:6px; padding:10px 16px;
+  overflow-x:auto; background:var(--white);
+  border-bottom:1px solid var(--gray-border);
+}
+.action-pills::-webkit-scrollbar { display:none; }
+.pill {
+  flex-shrink:0; padding:6px 14px; border-radius:20px; border:1px solid var(--gray-border);
+  background:var(--gray-light); font-size:12px; font-weight:700;
+  color:var(--text2); cursor:pointer; transition:all 0.12s; white-space:nowrap;
+}
+.pill:active { transform:scale(0.95); }
+.pill.on { box-shadow:0 0 0 2px currentColor; }
+.pill-wait { }
+.pill-wait.on { background:var(--orange-light); color:var(--orange); border-color:var(--orange-border); }
+.pill-pause.on { background:var(--blue-light); color:var(--blue); border-color:var(--blue-border); }
+.pill-stau.on { background:var(--red-light); color:var(--red); border-color:var(--red-border); }
+.pill-clean.on { background:var(--yellow-light); color:var(--yellow); border-color:var(--yellow-border); }
+.pill-msg { position:relative; }
+.msg-badge {
+  position:absolute; top:-4px; right:-4px;
+  background:var(--red); color:#fff; border-radius:10px;
+  font-size:9px; font-weight:800; padding:1px 5px; display:none;
+}
+
+/* STATUS BAR */
+.status-pill {
+  margin:12px 16px 0;
+  background:var(--white); border:1px solid var(--gray-border);
+  border-radius:var(--radius); padding:12px 14px;
+  display:flex; align-items:center; gap:10px;
+  box-shadow:var(--shadow);
+}
+.s-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.s-dot-green { background:var(--green); box-shadow:0 0 0 3px rgba(22,163,74,0.15); }
+.s-dot-orange { background:var(--orange); box-shadow:0 0 0 3px rgba(249,115,22,0.15); animation:dotPulse 1s infinite; }
+@keyframes dotPulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+.s-info { flex:1; min-width:0; }
+.s-name { font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.s-sub { font-size:11px; color:var(--text2); margin-top:1px; }
+.s-timer { font-family:var(--mono); font-size:14px; color:var(--orange); font-weight:600; flex-shrink:0; }
+
+/* ORDER LIST */
+.orders-list { padding:10px 16px 20px; }
+
+.order-card {
+  background:var(--white); border:1px solid var(--gray-border);
+  border-radius:var(--radius); margin-bottom:10px;
+  box-shadow:var(--shadow); overflow:hidden; cursor:pointer;
+  transition:all 0.15s;
+}
+.order-card:active { transform:scale(0.99); box-shadow:none; }
+.order-card.started { border-color:var(--green-border); border-width:2px; }
+.order-progress { height:4px; background:var(--gray-border); display:flex; gap:1px; }
+.order-progress-seg { flex:1; background:var(--gray-border); transition:background 0.3s; }
+.order-progress-seg.done { background:var(--green); }
+.order-progress-seg.active { background:var(--orange); }
+
+.order-body { padding:13px 14px; }
+.order-row1 { display:flex; align-items:center; gap:7px; margin-bottom:8px; flex-wrap:wrap; }
+.order-type {
+  padding:3px 10px; border-radius:20px;
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+}
+.ot-wechseln { background:var(--orange-light); color:var(--orange); border:1px solid var(--orange-border); }
+.ot-leeren { background:var(--blue-light); color:var(--blue); border:1px solid var(--blue-border); }
+.ot-stellen { background:var(--green-light); color:var(--green); border:1px solid var(--green-border); }
+.order-num { font-family:var(--mono); font-size:11px; color:var(--text3); }
+.order-privat { background:var(--yellow-light); color:var(--yellow); border:1px solid var(--yellow-border); padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+.order-active-badge {
+  margin-left:auto; font-size:11px; font-weight:700;
+  color:var(--green); display:flex; align-items:center; gap:4px;
+}
+.order-customer { font-size:17px; font-weight:800; color:var(--text); }
+.order-address { font-size:12px; color:var(--text2); margin-top:3px; }
+.order-cont { font-family:var(--mono); font-size:12px; color:var(--orange); margin-top:4px; font-weight:600; }
+.order-note { font-size:12px; color:var(--yellow); background:var(--yellow-light); border:1px solid var(--yellow-border); padding:5px 10px; border-radius:7px; margin-top:6px; }
+
+.order-footer {
+  border-top:1px solid var(--gray-border);
+  padding:8px 14px; display:flex; gap:8px;
+}
+.order-footer-btn {
+  flex:1; padding:8px; border-radius:8px; border:none;
+  font-family:var(--font); font-size:12px; font-weight:700;
+  cursor:pointer; text-align:center; transition:all 0.12s;
+  background:var(--gray-light); color:var(--text2); border:1px solid var(--gray-border);
+}
+.order-footer-btn:active { transform:scale(0.95); }
+.ofb-nav { color:var(--blue); background:var(--blue-light); border-color:var(--blue-border); }
+
+/* ===== WORKFLOW SCREEN ===== */
+#s-workflow { background:var(--white); }
+.wf-header {
+  background:var(--white); border-bottom:1px solid var(--gray-border);
+  padding:12px 16px; display:flex; align-items:center; gap:12px;
+  position:sticky; top:0; z-index:50; box-shadow:var(--shadow);
+}
+.wf-back {
+  background:var(--gray-light); border:1px solid var(--gray-border);
+  border-radius:8px; padding:8px 14px;
+  font-size:13px; font-weight:700; color:var(--text); cursor:pointer;
+}
+.wf-title { font-size:16px; font-weight:800; flex:1; }
+.wf-body { padding:16px; }
+
+/* WF STEPS */
+.wf-step { display:none; animation:fadeIn 0.2s ease; }
+.wf-step.active { display:block; }
+
+/* Order info box */
+.wf-order-box {
+  background:var(--gray-light); border:1px solid var(--gray-border);
+  border-radius:var(--radius); padding:14px; margin-bottom:20px;
+}
+.wf-order-type { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text2); margin-bottom:6px; }
+.wf-order-customer { font-size:20px; font-weight:900; }
+.wf-order-addr { font-size:12px; color:var(--text2); margin-top:3px; }
+.wf-order-cont { font-family:var(--mono); font-size:14px; color:var(--orange); margin-top:6px; font-weight:700; }
+.wf-order-note { font-size:12px; color:var(--yellow); background:var(--yellow-light); border:1px solid var(--yellow-border); padding:6px 10px; border-radius:7px; margin-top:8px; }
+
+/* PHASE INDICATOR */
+.phase-bar { display:flex; gap:8px; margin-bottom:20px; }
+.phase-seg {
+  flex:1; padding:10px 8px; border-radius:10px; border:2px solid var(--gray-border);
+  text-align:center; font-size:11px; font-weight:700;
+  color:var(--text3); background:var(--gray-light); transition:all 0.3s;
+  cursor:default;
+}
+.phase-seg.done { background:var(--green-light); border-color:var(--green-border); color:var(--green); }
+.phase-seg.active { background:var(--orange-light); border-color:var(--orange-border); color:var(--orange); }
+
+/* TYPE BUTTONS */
+.type-btn {
+  width:100%; padding:18px 16px; border-radius:var(--radius); border:2px solid;
+  font-family:var(--font); font-size:16px; font-weight:800;
+  cursor:pointer; display:flex; align-items:center; gap:14px;
+  margin-bottom:10px; transition:all 0.15s; text-align:left;
+}
+.type-btn:active { transform:scale(0.98); }
+.type-btn .ticon { font-size:30px; flex-shrink:0; }
+.type-btn .tsub { font-size:12px; font-weight:500; opacity:0.7; margin-top:2px; }
+.tbtn-auf { background:var(--orange-light); border-color:var(--orange-border); color:var(--orange); }
+.tbtn-leer { background:var(--blue-light); border-color:var(--blue-border); color:var(--blue); }
+.tbtn-abs { background:var(--green-light); border-color:var(--green-border); color:var(--green); }
+
+/* ABBRECHEN */
+.abbrechen-btn {
+  width:100%; padding:16px; border-radius:var(--radius); border:2px solid var(--red-border);
+  background:var(--red-light); color:var(--red);
+  font-family:var(--font); font-size:15px; font-weight:800;
+  cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px;
+  margin-top:16px; transition:all 0.15s;
+}
+.abbrechen-list { display:none; margin-top:8px; }
+.abbrech-item {
+  background:var(--white); border:1px solid var(--gray-border);
+  border-radius:9px; padding:13px 14px; margin-bottom:7px;
+  cursor:pointer; display:flex; align-items:center; gap:12px;
+  transition:all 0.12s;
+}
+.abbrech-item:active { background:var(--red-light); border-color:var(--red-border); }
+.abbrech-code { font-family:var(--mono); font-size:12px; color:var(--red); font-weight:700; min-width:28px; }
+
+/* SCAN */
+.scan-zone {
+  border:2px dashed var(--gray-border); border-radius:var(--radius);
+  padding:28px 16px; text-align:center; cursor:pointer;
+  transition:all 0.2s; margin-bottom:12px; background:var(--gray-light);
+}
+.scan-zone:active { border-color:var(--orange); background:var(--orange-light); }
+.scan-icon { font-size:48px; margin-bottom:8px; }
+.scan-text { font-size:13px; color:var(--text2); line-height:1.5; }
+.scan-img { width:100%; max-height:200px; object-fit:cover; border-radius:10px; display:none; margin-bottom:10px; }
+.ai-box {
+  background:var(--orange-light); border:1px solid var(--orange-border);
+  border-radius:10px; padding:14px; text-align:center; display:none; margin-bottom:12px;
+}
+.ai-lbl { font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--orange); margin-bottom:6px; }
+.ai-num { font-family:var(--mono); font-size:28px; color:var(--orange); font-weight:700; }
+.ai-sub { font-size:11px; color:var(--text2); margin-top:4px; }
+.spin { width:16px; height:16px; border:2px solid var(--gray-border); border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; display:inline-block; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* DEST BUTTONS */
+.dest-btn {
+  width:100%; padding:17px 16px; border-radius:var(--radius); border:2px solid;
+  font-family:var(--font); font-size:15px; font-weight:800;
+  cursor:pointer; display:flex; align-items:center; gap:14px;
+  margin-bottom:10px; transition:all 0.15s; text-align:left;
+}
+.dest-btn:active { transform:scale(0.98); }
+.dest-btn .dicon { font-size:28px; flex-shrink:0; }
+.dest-btn .dsub { font-size:11px; font-weight:500; opacity:0.7; margin-top:2px; }
+.dbtn-k { background:var(--orange-light); border-color:var(--orange-border); color:var(--orange); }
+.dbtn-m { background:var(--green-light); border-color:var(--green-border); color:var(--green); }
+.dbtn-g { background:var(--blue-light); border-color:var(--blue-border); color:var(--blue); }
+.dbtn-f { background:var(--yellow-light); border-color:var(--yellow-border); color:var(--yellow); }
+
+/* NAVIGATION EKRAN */
+.nav-screen-header {
+  background:var(--orange); padding:14px 16px;
+  font-size:15px; font-weight:800; color:#fff; text-align:center;
+  letter-spacing:0.5px;
+}
+.nav-addr-box {
+  background:var(--green-light); border-bottom:2px solid var(--green-border);
+  padding:20px 16px; text-align:center;
+}
+.nav-addr-name { font-size:18px; font-weight:800; color:var(--green); }
+.nav-addr-street { font-size:14px; color:var(--text2); margin-top:4px; }
+.nav-option-btn {
+  width:100%; padding:20px 16px; border:none; border-bottom:1px solid var(--gray-border);
+  background:var(--white); font-family:var(--font); font-size:16px; font-weight:700;
+  cursor:pointer; text-align:center; color:var(--text); transition:all 0.15s;
+}
+.nav-option-btn:active { background:var(--gray-light); }
+.nav-option-btn.no-nav { color:var(--red); background:var(--red-light); border-color:var(--red-border); }
+
+/* SUCCESS */
+.success-wrap { text-align:center; padding:48px 20px 32px; }
+.suc-icon { font-size:72px; margin-bottom:16px; }
+.suc-title { font-size:24px; font-weight:900; color:var(--green); }
+.suc-sub { font-size:14px; color:var(--text2); margin-top:8px; }
+.suc-summary {
+  background:var(--gray-light); border:1px solid var(--gray-border);
+  border-radius:var(--radius); padding:16px; margin:20px 0;
+  text-align:left; font-size:14px; line-height:2;
+}
+
+/* AUFTRAG FERTIG BTN */
+.fertig-bar {
+  position:fixed; bottom:0; left:0; right:0;
+  display:none; z-index:50;
+}
+.fertig-bar.show { display:block; }
+.fertig-btn {
+  width:100%; padding:20px;
+  background:var(--green); border:none;
+  font-family:var(--font); font-size:18px; font-weight:900;
+  color:#fff; cursor:pointer; letter-spacing:0.5px;
+  box-shadow:0 -4px 16px rgba(22,163,74,0.25);
+}
+.fertig-btn:active { background:var(--green-dark, #15803d); }
+.abbrechen-bar-btn {
+  width:100%; padding:12px;
+  background:var(--red-light); border:none; border-top:1px solid var(--red-border);
+  font-family:var(--font); font-size:13px; font-weight:700;
+  color:var(--red); cursor:pointer;
+}
+
+/* MESSAGES OVERLAY */
+.msg-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:flex-end; }
+.msg-overlay.open { display:flex; }
+.msg-panel {
+  background:var(--white); border-radius:20px 20px 0 0;
+  padding:20px 16px 32px; width:100%;
+  max-height:80vh; overflow-y:auto; animation:slideUp 0.25s ease;
+  box-shadow:0 -8px 32px rgba(0,0,0,0.15);
+}
+@keyframes slideUp { from{transform:translateY(100%)}to{transform:translateY(0)} }
+.panel-handle { width:36px; height:4px; background:var(--gray-border); border-radius:2px; margin:0 auto 16px; }
+.panel-title { font-size:18px; font-weight:900; margin-bottom:14px; }
+.msg-item { background:var(--gray-light); border:1px solid var(--gray-border); border-radius:10px; padding:12px 13px; margin-bottom:8px; }
+.msg-from { font-size:11px; color:var(--orange); font-weight:700; }
+.msg-time { font-family:var(--mono); font-size:10px; color:var(--text3); margin-left:8px; }
+.msg-text { font-size:14px; margin-top:4px; line-height:1.4; color:var(--text); }
+.msg-new { border-color:var(--orange-border); background:var(--orange-light); }
+
+/* FULL BTNS */
+.fbtn {
+  width:100%; padding:15px; border-radius:10px; border:none;
+  font-family:var(--font); font-size:15px; font-weight:800;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  gap:8px; margin-bottom:8px; transition:all 0.12s;
+}
+.fbtn:active { transform:scale(0.98); }
+.fbtn-orange { background:var(--orange); color:#fff; box-shadow:0 4px 12px rgba(249,115,22,0.3); }
+.fbtn-green { background:var(--green); color:#fff; }
+.fbtn-ghost { background:var(--gray-light); color:var(--text); border:1px solid var(--gray-border); }
+.fbtn-red { background:var(--red-light); color:var(--red); border:1px solid var(--red-border); }
+
+/* INPUTS */
+.inp { width:100%; background:var(--white); border:1px solid var(--gray-border); border-radius:8px; padding:11px 13px; color:var(--text); font-size:14px; font-family:var(--font); outline:none; margin-bottom:10px; transition:border-color 0.2s; }
+.inp:focus { border-color:var(--orange); }
+.inp::placeholder { color:var(--text3); }
+.lbl { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text2); display:block; margin-bottom:5px; margin-top:12px; }
+.lbl:first-child { margin-top:0; }
+
+/* SECTION HEADER */
+.sec-hdr { font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text2); margin-bottom:12px; margin-top:4px; }
+
+/* TOAST */
+.toast {
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(10px);
+  padding:11px 22px; border-radius:24px;
+  font-family:var(--font); font-weight:700; font-size:13px;
+  opacity:0; transition:all 0.3s; z-index:9999;
+  white-space:nowrap; max-width:90vw; text-align:center;
+  box-shadow:var(--shadow-lg);
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.tg { background:var(--green); color:#fff; }
+.to { background:var(--orange); color:#fff; }
+.tr { background:var(--red); color:#fff; }
+
+.empty { text-align:center; padding:48px 20px; color:var(--text3); }
+.empty-icon { font-size:48px; display:block; margin-bottom:12px; }
+</style>
+</head>
+<body>
+
+<!-- LANG BAR -->
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('de')">DE</button>
+  <button class="lang-btn" onclick="setLang('sr')">SR</button>
+  <button class="lang-btn" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- ===== LOGIN ===== -->
+<div class="screen active" id="s-login">
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)">
+    <div class="login-logo">
+      <div class="login-logo-mark">🚛</div>
+      <div class="login-logo-name">Meindl <span>Fahrer</span></div>
+      <div class="login-logo-sub" data-t="login_sub">Umschlag & Transport</div>
+    </div>
+    <div class="login-card">
+      <div class="login-lbl" data-t="login_lbl">Personalnummer eingeben</div>
+      <div class="num-display" id="numDisplay">—</div>
+      <div class="numpad">
+        <div class="nkey" onclick="nkey('1')">1</div>
+        <div class="nkey" onclick="nkey('2')">2</div>
+        <div class="nkey" onclick="nkey('3')">3</div>
+        <div class="nkey" onclick="nkey('4')">4</div>
+        <div class="nkey" onclick="nkey('5')">5</div>
+        <div class="nkey" onclick="nkey('6')">6</div>
+        <div class="nkey" onclick="nkey('7')">7</div>
+        <div class="nkey" onclick="nkey('8')">8</div>
+        <div class="nkey" onclick="nkey('9')">9</div>
+        <div class="nkey empty"></div>
+        <div class="nkey" onclick="nkey('0')">0</div>
+        <div class="nkey del" onclick="ndel()">&#9003;</div>
+      </div>
+      <button class="fbtn fbtn-orange" style="margin-top:14px;" onclick="doLogin()" data-t="login_btn">Anmelden</button>
+    </div>
+    <div class="login-hint" data-t="login_hint">Demo: 334 · 101 · 228</div>
+  </div>
+</div>
+
+<!-- ===== ABFAHRT ===== -->
+<div class="screen" id="s-abfahrt">
+  <div class="abfahrt-top">
+    <div class="abfahrt-driver-card">
+      <div class="abfahrt-driver-avatar" id="abfahrtAvatar">B</div>
+      <div>
+        <div class="abfahrt-driver-name" id="abfahrtName">—</div>
+        <div class="abfahrt-driver-num" id="abfahrtNum">—</div>
+      </div>
+    </div>
+  </div>
+  <div class="abfahrt-title" data-t="abfahrt_title">Abfahrtskontrolle</div>
+  <button class="abfahrt-btn abtn-ok" onclick="abfahrtOK()">
+    <span class="abfahrt-btn-icon">&#9989;</span>
+    <div><span class="abfahrt-btn-title" data-t="abfahrt_ok">Fahrzeug ist OK</span><span class="abfahrt-btn-sub" data-t="abfahrt_ok_sub">Alles in Ordnung, Tour starten</span></div>
+  </button>
+  <button class="abfahrt-btn abtn-problem" onclick="toggleProblemForm()">
+    <span class="abfahrt-btn-icon">&#9888;</span>
+    <div><span class="abfahrt-btn-title" data-t="abfahrt_prob">Problem melden</span><span class="abfahrt-btn-sub" data-t="abfahrt_prob_sub">Schaden oder Defekt beschreiben</span></div>
+  </button>
+
+  <div class="problem-form" id="problemForm">
+    <div class="flbl" data-t="prob_lbl">Beschreibung — sprich auf Serbisch</div>
+    <div class="voice-row">
+      <textarea class="finp" id="problemOriginal" rows="2" style="flex:1;margin-bottom:0;" placeholder="Govori ili pisi na srpskom..."></textarea>
+      <button class="mic-btn" id="micBtn" onclick="startVoice()">🎤</button>
+    </div>
+    <div id="voiceStatus" style="font-size:11px;color:var(--red);margin-top:5px;display:none;" data-t="recording">Snima se... govori!</div>
+    <div class="translation-box" id="translationBox">
+      <div class="translation-lbl" data-t="translation_lbl">Ubersetzung (wird gesendet)</div>
+      <div class="translation-text" id="translationText"></div>
+    </div>
+    <div class="flbl" style="margin-top:14px;" data-t="foto_lbl">Foto (optional)</div>
+    <div class="foto-zone" onclick="document.getElementById('problemFoto').click()">
+      <img id="problemFotoPreview" class="foto-preview">
+      <div id="problemFotoIcon" style="font-size:32px;margin-bottom:6px;">📷</div>
+      <div style="font-size:12px;color:var(--text2);" data-t="foto_btn">Foto aufnehmen</div>
+    </div>
+    <input type="file" id="problemFoto" accept="image/*" capture="environment" style="display:none" onchange="handleProblemFoto(event)">
+    <button class="fbtn fbtn-red" style="margin-top:12px;" onclick="submitProblem()" data-t="prob_send">Problem absenden & weiter</button>
+  </div>
+</div>
+
+<!-- ===== AUFTRÄGE ===== -->
+<div class="screen" id="s-orders">
+  <div class="orders-header">
+    <div class="orders-brand">
+      <div class="orders-brand-mark">🚛</div>
+      <div class="orders-brand-name">Meindl <span>Fahrer</span></div>
+    </div>
+    <div class="orders-right">
+      <div class="orders-driver-chip" id="ordersDriver">—</div>
+      <div class="orders-time" id="ordersTime">--:--</div>
+      <div class="orders-logout" onclick="doLogout()" data-t="logout">Abmelden</div>
+    </div>
+  </div>
+
+  <div class="action-pills">
+    <button class="pill pill-wait" id="pill-wait" onclick="toggleAct('wait')" data-t="act_wait">Warten</button>
+    <button class="pill pill-pause" id="pill-pause" onclick="toggleAct('pause')" data-t="act_pause">Pause</button>
+    <button class="pill pill-stau" id="pill-stau" onclick="toggleAct('stau')" data-t="act_stau">Stau</button>
+    <button class="pill pill-clean" id="pill-clean" onclick="toggleAct('clean')" data-t="act_clean">Reinigen</button>
+    <button class="pill pill-msg" onclick="openMessages()">
+      💬 <span data-t="nachrichten">Nachrichten</span>
+      <span class="msg-badge" id="msgBadge">3</span>
+    </button>
+  </div>
+
+  <div class="status-pill">
+    <div class="s-dot s-dot-green" id="sDot"></div>
+    <div class="s-info">
+      <div class="s-name" id="sName" data-t="bereit">Bereit</div>
+      <div class="s-sub" id="sSub" data-t="kein_auftrag">Kein Auftrag aktiv</div>
+    </div>
+    <div class="s-timer" id="sTimer"></div>
+  </div>
+
+  <div class="orders-list" id="ordersList"></div>
+</div>
+
+<!-- ===== WORKFLOW ===== -->
+<div class="screen" id="s-workflow">
+  <div class="wf-header">
+    <button class="wf-back" onclick="closeWF()">&#8592; <span data-t="back">Zurück</span></button>
+    <div class="wf-title" id="wfTitle">—</div>
+  </div>
+  <div class="wf-body">
+
+    <!-- STEP 0: Typ wählen -->
+    <div class="wf-step active" id="wf0">
+      <div class="wf-order-box" id="wfBox0"></div>
+      <div class="phase-bar" id="phaseBar"></div>
+      <div class="sec-hdr" data-t="aktion_waehlen">Aktion wählen</div>
+      <button class="type-btn tbtn-auf" id="btnAufnehmen" onclick="wfPhase('aufnehmen')">
+        <span class="ticon">📤</span>
+        <div><div data-t="aufnehmen">AUFNEHMEN</div><div class="tsub" data-t="aufnehmen_sub">Container abholen, Ziel wählen</div></div>
+      </button>
+      <button class="type-btn tbtn-leer" id="btnLeeren" onclick="wfPhase('leeren')">
+        <span class="ticon">🗑️</span>
+        <div><div data-t="leeren">LEEREN</div><div class="tsub" data-t="leeren_sub">Container entleeren</div></div>
+      </button>
+      <button class="type-btn tbtn-abs" id="btnAbstellen" onclick="wfPhase('abstellen')">
+        <span class="ticon">📥</span>
+        <div><div data-t="abstellen">ABSTELLEN</div><div class="tsub" data-t="abstellen_sub">Container aufstellen, Ziel wählen</div></div>
+      </button>
+      <button class="abbrechen-btn" onclick="toggleAbbrechen()">
+        <span style="font-size:20px;">&#10060;</span>
+        <span data-t="abbrechen">ABBRECHEN</span>
+      </button>
+      <div class="abbrechen-list" id="abbrechenList"></div>
+    </div>
+
+    <!-- STEP 1: Navigation -->
+    <div class="wf-step" id="wf-nav">
+      <div class="nav-screen-header" data-t="navigation">Navigation</div>
+      <div class="nav-addr-box">
+        <div class="nav-addr-name" id="navName">—</div>
+        <div class="nav-addr-street" id="navAddr">—</div>
+      </div>
+      <button class="nav-option-btn" onclick="navGoogleMaps()" data-t="nav_google">Google Maps öffnen</button>
+      <button class="nav-option-btn" onclick="navWaze()" data-t="nav_waze">Waze öffnen</button>
+      <button class="nav-option-btn no-nav" onclick="showWFStep('wf0')" data-t="nav_ohne">Ohne Navigation weiter</button>
+    </div>
+
+    <!-- STEP 2: Container scannen -->
+    <div class="wf-step" id="wf-scan">
+      <div class="wf-order-box" id="wfBox2"></div>
+      <div class="sec-hdr" id="scanTitle" data-t="scan_title">Container-Nr. scannen</div>
+      <div class="scan-zone" onclick="document.getElementById('scanFile').click()">
+        <div class="scan-icon" id="scanIcon">📷</div>
+        <div class="scan-text" data-t="scan_text">Foto aufnehmen — KI erkennt die Nummer automatisch</div>
+        <img id="scanImg" class="scan-img">
+      </div>
+      <input type="file" id="scanFile" accept="image/*" capture="environment" style="display:none" onchange="handleScanFile(event)">
+      <div class="ai-box" id="aiBox">
+        <div class="ai-lbl" data-t="ai_lbl">KI-Erkennung</div>
+        <div class="ai-num" id="aiNum">—</div>
+        <div class="ai-sub" id="aiSub"></div>
+      </div>
+      <div class="lbl" data-t="cont_nr">Container-Nr.</div>
+      <input class="inp" id="scanContNum" placeholder="z.B. 5008" style="font-family:var(--mono);letter-spacing:3px;font-size:20px;text-align:center;">
+      <button class="fbtn fbtn-orange" onclick="wfGoScanDone()" data-t="weiter">Weiter</button>
+      <button class="fbtn fbtn-ghost" onclick="showWFStep('wf0')" data-t="back">Zurück</button>
+    </div>
+
+    <!-- STEP 3: Ziel wählen -->
+    <div class="wf-step" id="wf-dest">
+      <div style="margin-bottom:6px;">
+        <div style="font-size:13px;color:var(--text2);font-weight:600;" data-t="container">Container</div>
+        <div style="font-family:var(--mono);font-size:22px;color:var(--orange);font-weight:700;margin:4px 0 20px;" id="destContNum">—</div>
+      </div>
+      <div class="sec-hdr" data-t="wohin">Wohin mit dem Container?</div>
+      <button class="dest-btn dbtn-k" onclick="wfSelectDest('Kunde')">
+        <span class="dicon">🏭</span>
+        <div><div data-t="kunde">KUNDE</div><div class="dsub" data-t="kunde_sub">Container beim Kunden lassen</div></div>
+      </button>
+      <button class="dest-btn dbtn-m" onclick="wfSelectDest('Lagerplatz Meindl')">
+        <span class="dicon">🟢</span>
+        <div><div>LAGERPLATZ MEINDL</div><div class="dsub">Meindl Umschlag Kuffholz</div></div>
+      </button>
+      <button class="dest-btn dbtn-g" onclick="wfSelectDest('Lagerplatz Grau')">
+        <span class="dicon">🔵</span>
+        <div><div>LAGERPLATZ GRAU</div><div class="dsub">Grau Entsorgung</div></div>
+      </button>
+      <button class="dest-btn dbtn-f" onclick="wfSelectDest('Fahrzeug')">
+        <span class="dicon">🚛</span>
+        <div><div data-t="fahrzeug">FAHRZEUG</div><div class="dsub" data-t="fahrzeug_sub">Bleibt auf dem LKW</div></div>
+      </button>
+      <button class="fbtn fbtn-ghost" style="margin-top:8px;" onclick="showWFStep('wf-scan')" data-t="back">Zurück</button>
+    </div>
+
+    <!-- STEP 4: Leeren Foto -->
+    <div class="wf-step" id="wf-leeren">
+      <div class="wf-order-box" id="wfBox4"></div>
+      <div class="sec-hdr" data-t="ware_foto">Ware fotografieren (Privatfirma)</div>
+      <div class="scan-zone" onclick="document.getElementById('warenFile').click()">
+        <div class="scan-icon" id="warenIcon">📷</div>
+        <div class="scan-text" data-t="ware_text">Foto der Ware aufnehmen</div>
+        <img id="warenImg" class="scan-img">
+      </div>
+      <input type="file" id="warenFile" accept="image/*" capture="environment" style="display:none" onchange="handleWarenFile(event)">
+      <div class="lbl" data-t="bemerkung">Bemerkung (optional)</div>
+      <input class="inp" id="leerenBem" placeholder="z.B. Pappe, Glas...">
+      <button class="fbtn fbtn-green" onclick="wfLeerenDone()" data-t="leeren_confirm">Leeren bestätigen</button>
+      <button class="fbtn fbtn-ghost" onclick="wfLeerenDone()" data-t="ohne_foto">Ohne Foto fortfahren</button>
+    </div>
+
+    <!-- STEP 5: Phase done -->
+    <div class="wf-step" id="wf-phasedone">
+      <div style="text-align:center;padding:32px 0 20px;">
+        <div style="font-size:64px;margin-bottom:12px;">✅</div>
+        <div style="font-size:20px;font-weight:900;color:var(--green);" id="phaseDoneTitle">Erledigt!</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:6px;" id="phaseDoneSub"></div>
+      </div>
+      <div style="background:var(--green-light);border:1px solid var(--green-border);border-radius:var(--radius);padding:14px;margin-bottom:16px;" id="phaseDoneSummary"></div>
+      <div class="phase-bar" id="phaseBarDone"></div>
+      <button class="fbtn fbtn-orange" onclick="showWFStep('wf0')" data-t="naechste_phase">Nächste Aktion</button>
+    </div>
+
+  </div>
+
+  <!-- FERTIG BAR -->
+  <div class="fertig-bar" id="fertigBar">
+    <button class="fertig-btn" onclick="auftragFertig()" data-t="fertig">AUFTRAG FERTIG</button>
+    <button class="abbrechen-bar-btn" onclick="openAbbrechenFromBar()" data-t="abbrechen">Abbrechen</button>
+  </div>
+</div>
+
+<!-- NACHRICHTEN -->
+<div class="msg-overlay" id="msgOverlay">
+  <div class="msg-panel">
+    <div class="panel-handle"></div>
+    <div class="panel-title" data-t="nachrichten">Nachrichten</div>
+    <div id="msgList"></div>
+    <div class="lbl" data-t="neue_msg">Neue Nachricht</div>
+    <textarea class="inp" id="newMsgTxt" rows="3" placeholder="Nachricht..."></textarea>
+    <button class="fbtn fbtn-orange" onclick="sendMsg()" data-t="senden">Senden</button>
+    <button class="fbtn fbtn-ghost" onclick="closeMessages()" data-t="schliessen">Schließen</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ TRANSLATIONS ============
+const T = {
+  de: {
+    login_sub:'Umschlag & Transport', login_lbl:'Personalnummer eingeben', login_btn:'Anmelden', login_hint:'Demo: 334 · 101 · 228',
+    abfahrt_title:'Abfahrtskontrolle', abfahrt_ok:'Fahrzeug ist OK', abfahrt_ok_sub:'Alles in Ordnung, Tour starten',
+    abfahrt_prob:'Problem melden', abfahrt_prob_sub:'Schaden oder Defekt beschreiben',
+    prob_lbl:'Beschreibung — sprich auf Serbisch', recording:'Snima se... govori!',
+    translation_lbl:'Ubersetzung (wird gesendet)', foto_lbl:'Foto (optional)', foto_btn:'Foto aufnehmen', prob_send:'Problem absenden & weiter',
+    logout:'Abmelden', act_wait:'Warten', act_pause:'Pause', act_stau:'Stau', act_clean:'Reinigen', nachrichten:'Nachrichten',
+    bereit:'Bereit', kein_auftrag:'Kein Auftrag aktiv', back:'Zurück',
+    aktion_waehlen:'Aktion wählen', aufnehmen:'AUFNEHMEN', aufnehmen_sub:'Container abholen, Ziel wählen',
+    leeren:'LEEREN', leeren_sub:'Container entleeren',
+    abstellen:'ABSTELLEN', abstellen_sub:'Container aufstellen, Ziel wählen',
+    abbrechen:'ABBRECHEN', navigation:'Navigation',
+    nav_google:'Google Maps öffnen', nav_waze:'Waze öffnen', nav_ohne:'Ohne Navigation weiter',
+    scan_title:'Container-Nr. scannen', scan_text:'Foto aufnehmen — KI erkennt die Nummer automatisch',
+    ai_lbl:'KI-Erkennung', cont_nr:'Container-Nr.', weiter:'Weiter',
+    wohin:'Wohin mit dem Container?', kunde:'KUNDE', kunde_sub:'Container beim Kunden lassen',
+    fahrzeug:'FAHRZEUG', fahrzeug_sub:'Bleibt auf dem LKW',
+    ware_foto:'Ware fotografieren (Privatfirma)', ware_text:'Foto der Ware aufnehmen',
+    bemerkung:'Bemerkung (optional)', leeren_confirm:'Leeren bestätigen', ohne_foto:'Ohne Foto fortfahren',
+    naechste_phase:'Nächste Aktion', fertig:'AUFTRAG FERTIG',
+    neue_msg:'Neue Nachricht', senden:'Senden', schliessen:'Schließen', container:'Container',
+  },
+  sr: {
+    login_sub:'Prevoz kontejnera', login_lbl:'Unesite licni broj', login_btn:'Prijava', login_hint:'Demo: 334 · 101 · 228',
+    abfahrt_title:'Pregled vozila', abfahrt_ok:'Vozilo je ispravno', abfahrt_ok_sub:'Sve je u redu, pocni turu',
+    abfahrt_prob:'Prijavi problem', abfahrt_prob_sub:'Opisi kvar ili ostecenje',
+    prob_lbl:'Opis — govori na srpskom', recording:'Snima se... govori!',
+    translation_lbl:'Prijevod (salje se dispeceru)', foto_lbl:'Foto (opciono)', foto_btn:'Uslikaj', prob_send:'Posalji problem & nastavi',
+    logout:'Odjava', act_wait:'Cekanje', act_pause:'Pauza', act_stau:'Guzva', act_clean:'Ciscenje', nachrichten:'Poruke',
+    bereit:'Spreman', kein_auftrag:'Nema aktivnog naloga', back:'Nazad',
+    aktion_waehlen:'Odaberi akciju', aufnehmen:'UZIMANJE', aufnehmen_sub:'Uzmi kontejner, odaberi odrediste',
+    leeren:'PRAZNJENJE', leeren_sub:'Isprazni kontejner',
+    abstellen:'POSTAVLJANJE', abstellen_sub:'Postavi kontejner, odaberi odrediste',
+    abbrechen:'OTKAZI', navigation:'Navigacija',
+    nav_google:'Otvori Google Maps', nav_waze:'Otvori Waze', nav_ohne:'Nastavi bez navigacije',
+    scan_title:'Skeniraj broj kontejnera', scan_text:'Uslikaj — AI automatski prepoznaje broj',
+    ai_lbl:'AI prepoznavanje', cont_nr:'Broj kontejnera', weiter:'Dalje',
+    wohin:'Gdje ide kontejner?', kunde:'KOD MUSTERIJE', kunde_sub:'Ostavljas kontejner kod musterije',
+    fahrzeug:'NA KAMIONU', fahrzeug_sub:'Ostaje na kamionu',
+    ware_foto:'Slikaj robu (privatna firma)', ware_text:'Uslikaj robu prije praznjenja',
+    bemerkung:'Napomena (opciono)', leeren_confirm:'Potvrdi praznjenje', ohne_foto:'Nastavi bez slike',
+    naechste_phase:'Sledeca akcija', fertig:'NALOG ZAVRSEN',
+    neue_msg:'Nova poruka', senden:'Posalji', schliessen:'Zatvori', container:'Kontejner',
+  },
+  en: {
+    login_sub:'Container Transport', login_lbl:'Enter personal number', login_btn:'Login', login_hint:'Demo: 334 · 101 · 228',
+    abfahrt_title:'Vehicle Check', abfahrt_ok:'Vehicle is OK', abfahrt_ok_sub:'All good, start tour',
+    abfahrt_prob:'Report problem', abfahrt_prob_sub:'Describe damage or defect',
+    prob_lbl:'Description — speak in Serbian', recording:'Recording... speak now!',
+    translation_lbl:'Translation (sent to manager)', foto_lbl:'Photo (optional)', foto_btn:'Take photo', prob_send:'Send problem & continue',
+    logout:'Logout', act_wait:'Waiting', act_pause:'Break', act_stau:'Traffic', act_clean:'Cleaning', nachrichten:'Messages',
+    bereit:'Ready', kein_auftrag:'No active order', back:'Back',
+    aktion_waehlen:'Choose action', aufnehmen:'PICK UP', aufnehmen_sub:'Collect container, choose destination',
+    leeren:'EMPTY', leeren_sub:'Empty the container',
+    abstellen:'PLACE', abstellen_sub:'Place container, choose destination',
+    abbrechen:'CANCEL', navigation:'Navigation',
+    nav_google:'Open Google Maps', nav_waze:'Open Waze', nav_ohne:'Continue without navigation',
+    scan_title:'Scan container number', scan_text:'Take photo — AI recognizes the number automatically',
+    ai_lbl:'AI Recognition', cont_nr:'Container No.', weiter:'Continue',
+    wohin:'Where does the container go?', kunde:'CUSTOMER', kunde_sub:'Leave container at customer',
+    fahrzeug:'VEHICLE', fahrzeug_sub:'Stays on the truck',
+    ware_foto:'Photo of goods (private company)', ware_text:'Take photo of goods before emptying',
+    bemerkung:'Note (optional)', leeren_confirm:'Confirm emptying', ohne_foto:'Continue without photo',
+    naechste_phase:'Next action', fertig:'ORDER COMPLETE',
+    neue_msg:'New message', senden:'Send', schliessen:'Close', container:'Container',
+  }
+};
+
+let lang = 'de';
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent===l.toUpperCase()));
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.getAttribute('data-t');
+    if (T[l][key]) el.textContent = T[l][key];
+  });
+}
+
+// ============ DATA ============
+const DRIVERS = { '334':'Boris K.', '101':'Max M.', '228':'Thomas R.' };
+
+const ORDERS = [
+  { id:1, type:'Wechseln', num:'5130642', customer:'Bayernwerk AG Lager Ponholz', address:'Obagstrasse 4, 93142 Maxhuette-Haidhof', cont:'AR40D', note:'Nur rechter AR40D, keinen AR40PLANE stellen!', isPrivat:false, status:'offen', phases:{aufnehmen:false,leeren:false,abstellen:false} },
+  { id:2, type:'Leeren', num:'5028093', customer:'Mueller GmbH (privat)', address:'Regensburg, Maxstrasse 12', cont:'9611', note:'', isPrivat:true, status:'offen', phases:{aufnehmen:false,leeren:false,abstellen:false} },
+  { id:3, type:'Wechseln', num:'5130370', customer:'Laepple Automotive GmbH', address:'August-Laepple-Platz 1, Teublitz', cont:'AR40D', note:'AR40D Kartonagen ist ein Rechter Deckel!', isPrivat:false, status:'offen', phases:{aufnehmen:false,leeren:false,abstellen:false} },
+  { id:4, type:'Leeren', num:'5028095', customer:'Amann Fritz (privat)', address:'Rottendorf, Schlossstrasse 1', cont:'3301', note:'', isPrivat:true, status:'offen', phases:{aufnehmen:false,leeren:false,abstellen:false} },
+];
+
+const ABBRECH_GRUENDE = [
+  { code:'A1', text:'Anderer Auftrag kommt dazwischen' },
+  { code:'51', text:'Container ueberladen' },
+  { code:'52', text:'Container nicht zugaenglich' },
+  { code:'53', text:'Container zugeparkt' },
+  { code:'54', text:'Falscher Termin' },
+  { code:'55', text:'Container defekt' },
+  { code:'56', text:'Mit diesem LKW nicht fahrbar' },
+  { code:'57', text:'Kunde nicht anwesend' },
+  { code:'58', text:'Kunde wuenscht keine Entleerung' },
+  { code:'59', text:'Container eingefroren' },
+];
+
+const MESSAGES = [
+  { from:'Christian Schaefer', time:'08:13', text:'Achtung: Stau A93 in Richtung Holledau!', isNew:true },
+  { from:'Tobias Rinner', time:'09:17', text:'Blitzer Zaitskofen bei Parkplatz', isNew:true },
+  { from:'Juergen Kuntze', time:'10:01', text:'Achtung LKW Kontrolle! Autobahn bei Jahnstadion!', isNew:true },
+];
+
+// ============ STATE ============
+const S = { driver:null, driverNum:null, loginTime:null, activeAct:null, actStart:null, totalWait:0, totalPause:0, wfOrder:null, wfType:null, wfContNum:null, activeOrderId:null };
+let actInt, clockInt;
+
+// ============ LOGIN ============
+let numVal = '';
+function nkey(k) { if(numVal.length>=4) return; numVal+=k; updateND(); }
+function ndel() { numVal=numVal.slice(0,-1); updateND(); }
+function updateND() {
+  const el=document.getElementById('numDisplay');
+  el.textContent=numVal||'—';
+  el.classList.toggle('has-val',numVal.length>0);
+}
+function doLogin() {
+  if(!numVal){toast('Personalnummer eingeben','o');return;}
+  const name=DRIVERS[numVal];
+  if(!name){toast('Unbekannte Nummer: '+numVal,'r'); numVal=''; updateND(); return;}
+  S.driver=name; S.driverNum=numVal; S.loginTime=new Date();
+  document.getElementById('abfahrtAvatar').textContent=name[0];
+  document.getElementById('abfahrtName').textContent=name;
+  document.getElementById('abfahrtNum').textContent='Personalnummer: '+numVal;
+  goScreen('s-abfahrt');
+  toast('Willkommen, '+name,'g');
+}
+function doLogout() {
+  if(!confirm('Wirklich abmelden?'))return;
+  clearInterval(actInt); clearInterval(clockInt);
+  numVal=''; updateND(); S.driver=null;
+  goScreen('s-login');
+}
+
+// ============ ABFAHRT ============
+function abfahrtOK() { toast('Fahrzeug OK','g'); goToOrders(); }
+function toggleProblemForm() { document.getElementById('problemForm').classList.toggle('show'); }
+function handleProblemFoto(e) {
+  const file=e.target.files[0]; if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    document.getElementById('problemFotoPreview').src=ev.target.result;
+    document.getElementById('problemFotoPreview').style.display='block';
+    document.getElementById('problemFotoIcon').style.display='none';
+    toast('Foto gespeichert','g');
+  };
+  r.readAsDataURL(file);
+}
+function submitProblem() {
+  const orig=document.getElementById('problemOriginal').value.trim();
+  if(!orig){toast('Bitte Beschreibung eingeben','o');return;}
+  toast('Problem gemeldet','o');
+  goToOrders();
+}
+function goToOrders() {
+  goScreen('s-orders');
+  document.getElementById('ordersDriver').textContent=S.driver+' #'+S.driverNum;
+  clockInt=setInterval(()=>{ document.getElementById('ordersTime').textContent=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}); },1000);
+  document.getElementById('ordersTime').textContent=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  renderOrders(); renderMessages();
+}
+
+// ============ ACTIONS ============
+const ACTS = {
+  wait:{id:'pill-wait',cls:'pill-wait',lbl:'WARTEN',col:'var(--orange)'},
+  pause:{id:'pill-pause',cls:'pill-pause',lbl:'PAUSE',col:'var(--blue)'},
+  stau:{id:'pill-stau',cls:'pill-stau',lbl:'STAU',col:'var(--red)'},
+  clean:{id:'pill-clean',cls:'pill-clean',lbl:'REINIGEN',col:'var(--yellow)'},
+};
+function toggleAct(t) { if(S.activeAct===t){stopAct();return;} if(S.activeAct)stopAct(); startAct(t); }
+function startAct(t) {
+  S.activeAct=t; S.actStart=Date.now();
+  const a=ACTS[t];
+  document.getElementById(a.id).classList.add('on');
+  document.getElementById('sDot').className='s-dot s-dot-orange';
+  document.getElementById('sName').textContent=a.lbl;
+  clearInterval(actInt);
+  actInt=setInterval(()=>{ document.getElementById('sTimer').textContent=fmtTime(Math.floor((Date.now()-S.actStart)/1000)); },1000);
+}
+function stopAct() {
+  if(!S.activeAct)return;
+  clearInterval(actInt);
+  const e=Math.floor((Date.now()-S.actStart)/1000);
+  if(S.activeAct==='wait')S.totalWait+=e;
+  if(S.activeAct==='pause')S.totalPause+=e;
+  const a=ACTS[S.activeAct];
+  document.getElementById(a.id).classList.remove('on');
+  S.activeAct=null;
+  document.getElementById('sDot').className='s-dot s-dot-green';
+  document.getElementById('sName').textContent=T[lang].bereit||'Bereit';
+  document.getElementById('sTimer').textContent='';
+}
+
+// ============ ORDERS ============
+function getPhaseCount(o) { return Object.values(o.phases).filter(v=>v).length; }
+function allPhasesDone(o) {
+  if(o.type==='Leeren') return o.phases.leeren;
+  if(o.type==='Stellen') return o.phases.abstellen;
+  return o.phases.aufnehmen && o.phases.leeren && o.phases.abstellen; // Wechseln
+}
+
+function renderOrders() {
+  const el=document.getElementById('ordersList');
+  const open=ORDERS.filter(o=>o.status!=='done');
+  if(!open.length){el.innerHTML='<div class="empty"><span class="empty-icon">&#10003;</span>Alle Auftraege erledigt!</div>';return;}
+  el.innerHTML=open.map(o=>{
+    const phases = getPhasesForType(o.type);
+    const progressSegs = phases.map(p=>`<div class="order-progress-seg ${o.phases[p]?'done':o.status==='started'&&!o.phases[p]?'':''}"></div>`).join('');
+    return `
+    <div class="order-card ${o.status==='started'?'started':''}" onclick="orderTap(${o.id})">
+      <div class="order-progress">${progressSegs}</div>
+      <div class="order-body">
+        <div class="order-row1">
+          <span class="order-type ot-${o.type.toLowerCase()}">${o.type}</span>
+          <span class="order-num">#${o.num}</span>
+          ${o.isPrivat?'<span class="order-privat">PRIVAT</span>':''}
+          ${o.status==='started'?'<span class="order-active-badge"><div class="s-dot s-dot-green" style="width:8px;height:8px;"></div> AKTIV</span>':''}
+        </div>
+        <div class="order-customer">${o.customer}</div>
+        <div class="order-address">&#128205; ${o.address}</div>
+        <div class="order-cont">Container #${o.cont}</div>
+        ${o.note?`<div class="order-note">&#9888; ${o.note}</div>`:''}
+      </div>
+      <div class="order-footer">
+        <button class="order-footer-btn ofb-nav" onclick="event.stopPropagation();openNavScreen(${o.id})">&#128205; Navigation</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getPhasesForType(type) {
+  if(type==='Leeren') return ['leeren'];
+  if(type==='Stellen') return ['abstellen'];
+  return ['aufnehmen','leeren','abstellen']; // Wechseln
+}
+
+function orderTap(id) {
+  const o=ORDERS.find(x=>x.id===id);
+  if(!o)return;
+  if(o.status==='offen') {
+    o.status='started';
+    S.activeOrderId=id;
+    document.getElementById('sDot').className='s-dot s-dot-green';
+    document.getElementById('sName').textContent=o.customer;
+    document.getElementById('sSub').textContent=o.address;
+    renderOrders();
+    toast(o.customer+' gestartet','g');
+  } else if(o.status==='started') {
+    openWF(id);
+  }
+}
+
+// ============ NAVIGATION ============
+function openNavScreen(id) {
+  const o=ORDERS.find(x=>x.id===id);
+  S.wfOrder=o;
+  document.getElementById('navName').textContent=o.customer;
+  document.getElementById('navAddr').textContent=o.address;
+  showWFStep('wf-nav');
+  goScreen('s-workflow');
+}
+function navGoogleMaps() { window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(S.wfOrder.address),'_blank'); }
+function navWaze() { window.open('https://waze.com/ul?q='+encodeURIComponent(S.wfOrder.address),'_blank'); }
+
+// ============ WORKFLOW ============
+function openWF(id) {
+  const o=ORDERS.find(x=>x.id===id);
+  S.wfOrder=o; S.wfType=null; S.wfContNum=null;
+  document.getElementById('wfTitle').textContent=o.customer;
+
+  // Reset scan
+  document.getElementById('scanImg').style.display='none';
+  document.getElementById('scanIcon').style.display='block';
+  document.getElementById('aiBox').style.display='none';
+  document.getElementById('scanContNum').value=o.cont;
+  document.getElementById('warenImg').style.display='none';
+  document.getElementById('warenIcon').style.display='block';
+  document.getElementById('leerenBem').value='';
+
+  const orderHTML=`
+    <div class="wf-order-type">${o.type} #${o.num}</div>
+    <div class="wf-order-customer">${o.customer}</div>
+    <div class="wf-order-addr">&#128205; ${o.address}</div>
+    <div class="wf-order-cont">Container #${o.cont}</div>
+    ${o.note?`<div class="wf-order-note">&#9888; ${o.note}</div>`:''}
+  `;
+  ['wfBox0','wfBox2','wfBox4'].forEach(id=>{ const el=document.getElementById(id); if(el)el.innerHTML=orderHTML; });
+
+  // Phase bar
+  const phases=getPhasesForType(o.type);
+  const phaseLabels={aufnehmen:'Aufnehmen',leeren:'Leeren',abstellen:'Abstellen'};
+  const phasesHTML=phases.map(p=>`<div class="phase-seg ${o.phases[p]?'done':''}" id="ps-${p}">${phaseLabels[p]}</div>`).join('');
+  ['phaseBar','phaseBarDone'].forEach(id=>{ const el=document.getElementById(id); if(el)el.innerHTML=phasesHTML; });
+
+  // Show/hide buttons based on type
+  document.getElementById('btnAufnehmen').style.display = phases.includes('aufnehmen')?'':'none';
+  document.getElementById('btnLeeren').style.display = phases.includes('leeren')?'':'none';
+  document.getElementById('btnAbstellen').style.display = phases.includes('abstellen')?'':'none';
+
+  // Render Abbrechen list
+  document.getElementById('abbrechenList').innerHTML=ABBRECH_GRUENDE.map(g=>`
+    <div class="abbrech-item" onclick="selectAbbruchGrund('${g.code}','${g.text}')">
+      <span class="abbrech-code">${g.code}</span>
+      <span style="font-size:14px;font-weight:600;">${g.text}</span>
+    </div>`).join('');
+
+  showWFStep('wf0');
+  updateFertigBar();
+  goScreen('s-workflow');
+}
+
+function closeWF() { goScreen('s-orders'); renderOrders(); }
+
+function showWFStep(stepId) {
+  document.querySelectorAll('.wf-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(stepId).classList.add('active');
+}
+
+function wfPhase(type) {
+  S.wfType=type;
+  if(type==='leeren') {
+    if(S.wfOrder.isPrivat) { showWFStep('wf-leeren'); }
+    else { wfLeerenDone(); }
+  } else {
+    document.getElementById('scanTitle').textContent = type==='aufnehmen' ? 'Container-Nr. scannen (Aufnehmen)' : 'Container-Nr. scannen (Abstellen)';
+    showWFStep('wf-scan');
+  }
+}
+
+function wfGoScanDone() {
+  const num=document.getElementById('scanContNum').value.trim();
+  if(!num){toast('Container-Nr. fehlt!','o');return;}
+  S.wfContNum=num;
+  document.getElementById('destContNum').textContent=num;
+  showWFStep('wf-dest');
+}
+
+function wfSelectDest(dest) {
+  S.wfOrder.phases[S.wfType]=true;
+  const label=S.wfType==='aufnehmen'?'Aufgenommen':'Abgestellt';
+  showPhaseDone(label, `Container #${S.wfContNum} — ${dest}`);
+}
+
+function wfLeerenDone() {
+  S.wfOrder.phases['leeren']=true;
+  const bem=document.getElementById('leerenBem').value;
+  showPhaseDone('Geleert', `Container #${S.wfOrder.cont}${bem?' — '+bem:''}`);
+}
+
+function showPhaseDone(title, summary) {
+  document.getElementById('phaseDoneTitle').textContent=title+'!';
+  document.getElementById('phaseDoneSub').textContent=new Date().toLocaleTimeString('de-DE');
+  document.getElementById('phaseDoneSummary').textContent=summary;
+
+  // Update phase bar
+  const phases=getPhasesForType(S.wfOrder.type);
+  const phaseLabels={aufnehmen:'Aufnehmen',leeren:'Leeren',abstellen:'Abstellen'};
+  const phasesHTML=phases.map(p=>`<div class="phase-seg ${S.wfOrder.phases[p]?'done':''}">${phaseLabels[p]}</div>`).join('');
+  document.getElementById('phaseBarDone').innerHTML=phasesHTML;
+
+  showWFStep('wf-phasedone');
+  updateFertigBar();
+  toast(title,'g');
+}
+
+function updateFertigBar() {
+  const bar=document.getElementById('fertigBar');
+  if(S.wfOrder && allPhasesDone(S.wfOrder)) bar.classList.add('show');
+  else bar.classList.remove('show');
+}
+
+function auftragFertig() {
+  const o=ORDERS.find(x=>x.id===S.wfOrder.id);
+  if(o) o.status='done';
+  S.activeOrderId=null;
+  document.getElementById('fertigBar').classList.remove('show');
+  document.getElementById('sDot').className='s-dot s-dot-green';
+  document.getElementById('sName').textContent=T[lang].bereit||'Bereit';
+  document.getElementById('sSub').textContent=T[lang].kein_auftrag||'Kein Auftrag aktiv';
+  toast('Auftrag erledigt!','g');
+  goScreen('s-orders');
+  renderOrders();
+}
+
+// ============ ABBRECHEN ============
+function toggleAbbrechen() {
+  const list=document.getElementById('abbrechenList');
+  list.style.display=list.style.display==='block'?'none':'block';
+}
+function openAbbrechenFromBar() {
+  goScreen('s-workflow');
+  showWFStep('wf0');
+  document.getElementById('abbrechenList').style.display='block';
+  setTimeout(()=>document.getElementById('abbrechenList').scrollIntoView({behavior:'smooth'}),100);
+}
+function selectAbbruchGrund(code, text) {
+  const o=ORDERS.find(x=>x.id===S.wfOrder.id);
+  if(o){o.status='offen'; o.phases={aufnehmen:false,leeren:false,abstellen:false};}
+  S.activeOrderId=null;
+  document.getElementById('sDot').className='s-dot s-dot-green';
+  document.getElementById('sName').textContent=T[lang].bereit||'Bereit';
+  document.getElementById('sSub').textContent=T[lang].kein_auftrag||'Kein Auftrag aktiv';
+  document.getElementById('fertigBar').classList.remove('show');
+  toast(code+' - '+text,'r');
+  goScreen('s-orders');
+  renderOrders();
+}
+
+// ============ AI SCAN ============
+function handleScanFile(e) {
+  const file=e.target.files[0]; if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    document.getElementById('scanImg').src=ev.target.result;
+    document.getElementById('scanImg').style.display='block';
+    document.getElementById('scanIcon').style.display='none';
+    document.getElementById('aiBox').style.display='block';
+    document.getElementById('aiNum').innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:8px"><div class="spin"></div>Analysiert...</div>';
+    document.getElementById('aiSub').textContent='';
+    fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:80,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:ev.target.result.split(',')[1]}},
+          {type:'text',text:'Extract ONLY the container number from this image (digits only). Reply with ONLY the number. If not visible reply: NOT_FOUND'}
+        ]}]})
+    }).then(r=>r.json()).then(d=>{
+      const res=d.content?.[0]?.text?.trim()||'NOT_FOUND';
+      if(res==='NOT_FOUND'||res.length<2){
+        document.getElementById('aiNum').textContent='Nicht erkannt';
+        document.getElementById('aiSub').textContent='Bitte manuell eingeben';
+      } else {
+        document.getElementById('aiNum').textContent=res;
+        document.getElementById('aiSub').textContent='Automatisch erkannt';
+        document.getElementById('scanContNum').value=res;
+        toast('Container #'+res,'g');
+      }
+    }).catch(()=>{ document.getElementById('aiNum').textContent='Fehler'; document.getElementById('aiSub').textContent='Manuell eingeben'; });
+  };
+  r.readAsDataURL(file);
+}
+function handleWarenFile(e) {
+  const file=e.target.files[0]; if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    document.getElementById('warenImg').src=ev.target.result;
+    document.getElementById('warenImg').style.display='block';
+    document.getElementById('warenIcon').style.display='none';
+    toast('Foto gespeichert','g');
+  };
+  r.readAsDataURL(file);
+}
+
+// ============ VOICE ============
+let recognition=null, translatedText='', translateTimer;
+function startVoice() {
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Mikrofon nur auf HTTPS verfuegbar','r');return;}
+  if(recognition){recognition.stop();return;}
+  recognition=new SR();
+  recognition.lang='sr-RS';
+  recognition.continuous=false;
+  recognition.interimResults=false;
+  const btn=document.getElementById('micBtn');
+  document.getElementById('voiceStatus').style.display='block';
+  btn.classList.add('recording');
+  recognition.onresult=e=>{
+    const text=e.results[0][0].transcript;
+    document.getElementById('problemOriginal').value=text;
+    document.getElementById('voiceStatus').style.display='none';
+    btn.classList.remove('recording');
+    doTranslate(text);
+  };
+  recognition.onerror=()=>{ btn.classList.remove('recording'); document.getElementById('voiceStatus').style.display='none'; toast('Greska mikrofona','r'); };
+  recognition.onend=()=>{ btn.classList.remove('recording'); recognition=null; };
+  recognition.start();
+}
+function doTranslate(text) {
+  const box=document.getElementById('translationBox');
+  const result=document.getElementById('translationText');
+  box.style.display='block';
+  result.textContent='Prevodi se...';
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,
+      messages:[{role:'user',content:'Prevedi na njemacki samo prevod bez komentara: '+text}]
+    })
+  }).then(r=>r.json()).then(d=>{
+    const de=d.content?.[0]?.text?.trim()||'';
+    translatedText=de; result.textContent=de; toast('Prevod gotov','g');
+  }).catch(()=>{ result.textContent='Greska pri prevodu'; });
+}
+document.addEventListener('input',e=>{
+  if(e.target.id!=='problemOriginal')return;
+  clearTimeout(translateTimer);
+  const val=e.target.value.trim();
+  if(val.length>5) translateTimer=setTimeout(()=>doTranslate(val),1800);
+});
+
+// ============ MESSAGES ============
+function renderMessages() {
+  const nc=MESSAGES.filter(m=>m.isNew).length;
+  const badge=document.getElementById('msgBadge');
+  badge.style.display=nc>0?'block':'none';
+  badge.textContent=nc;
+  document.getElementById('msgList').innerHTML=MESSAGES.map(m=>`
+    <div class="msg-item ${m.isNew?'msg-new':''}">
+      <span class="msg-from">${m.from}</span><span class="msg-time">${m.time}</span>
+      <div class="msg-text">${m.text}</div>
+    </div>`).join('');
+}
+function openMessages() { document.getElementById('msgOverlay').classList.add('open'); MESSAGES.forEach(m=>m.isNew=false); renderMessages(); }
+function closeMessages() { document.getElementById('msgOverlay').classList.remove('open'); }
+function sendMsg() {
+  const txt=document.getElementById('newMsgTxt').value.trim();
+  if(!txt){toast('Nachricht eingeben','o');return;}
+  MESSAGES.unshift({from:S.driver,time:new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}),text:txt,isNew:false});
+  document.getElementById('newMsgTxt').value='';
+  renderMessages(); toast('Nachricht gesendet','g');
+}
+
+// ============ UTILS ============
+function goScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function fmtTime(s) { return[Math.floor(s/3600),Math.floor((s%3600)/60),s%60].map(x=>String(x).padStart(2,'0')).join(':'); }
+let toastT;
+function toast(msg,t='g') {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast show t'+t;
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
