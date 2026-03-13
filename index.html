@@ -558,6 +558,35 @@ const MSGS=[
 const S={driver:null,driverNum:null,activeAct:null,actStart:null,wfOrder:null,activePhase:null};
 let actInt,clockInt,transTimer,recognition=null;
 
+// Save/restore state so Android camera doesn't lose login
+function saveState(){
+  try{sessionStorage.setItem('mfs',JSON.stringify({
+    driver:S.driver,driverNum:S.driverNum,
+    orders:ORDERS,
+    screen:document.querySelector('.screen.active')?.id||'s-login',
+    wfOrderId:S.wfOrder?.id||null,
+    lang:lang,dark:dark
+  }));}catch(e){}
+}
+function restoreState(){
+  try{
+    const d=JSON.parse(sessionStorage.getItem('mfs')||'null');
+    if(!d||!d.driver)return false;
+    S.driver=d.driver;S.driverNum=d.driverNum;
+    if(d.orders)d.orders.forEach(o=>{const idx=ORDERS.findIndex(x=>x.id===o.id);if(idx>=0)ORDERS[idx]=o;});
+    if(d.lang)setLang(d.lang);
+    if(d.dark&&!dark)toggleTheme();
+    if(d.screen==='s-orders'||d.screen==='s-workflow'){
+      goToOrders();
+      if(d.screen==='s-workflow'&&d.wfOrderId){
+        const o=ORDERS.find(x=>x.id===d.wfOrderId);
+        if(o){S.wfOrder=o;renderWFBase();goScr('s-workflow');}
+      }
+    }
+    return true;
+  }catch(e){return false;}
+}
+
 // ===== LOGIN =====
 let numVal='';
 function nk(k){if(numVal.length>=4)return;numVal+=k;updND();}
@@ -571,7 +600,7 @@ function doLogin(){
   document.getElementById('drvAv').textContent=name[0];
   document.getElementById('drvName').textContent=name;
   document.getElementById('drvNum').textContent='Nr. '+numVal;
-  goScr('s-abfahrt');
+  saveState();goScr('s-abfahrt');
   toast('Willkommen, '+name,'g');
 }
 function doLogout(){if(!confirm('Wirklich abmelden?'))return;clearInterval(actInt);clearInterval(clockInt);numVal='';updND();S.driver=null;goScr('s-login');}
@@ -595,7 +624,7 @@ function submitProb(){
   toast('Problem gemeldet','o');goToOrders();
 }
 function goToOrders(){
-  goScr('s-orders');
+  saveState();goScr('s-orders');
   document.getElementById('ordDrv').textContent=S.driver+' #'+S.driverNum;
   clearInterval(clockInt);
   clockInt=setInterval(()=>document.getElementById('ordTime').textContent=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}),1000);
@@ -680,7 +709,7 @@ function navWaze(){window.open('https://waze.com/ul?q='+encodeURIComponent(S.wfO
 function openWF(id){
   const o=ORDERS.find(x=>x.id===id);S.wfOrder=o;S.activePhase=null;
   document.getElementById('navOverlay').style.display='none';
-  renderWFBase();
+  saveState();renderWFBase();
   goScr('s-workflow');
 }
 function closeWF(){goScr('s-orders');renderOrders();}
@@ -798,29 +827,10 @@ function handleScan(e,key){
   r.onload=ev=>{
     const img=document.getElementById('si-'+key);
     const ico=document.getElementById('sico-'+key);
-    const aiBox=document.getElementById('ai-'+key);
-    const aiNum=document.getElementById('ain-'+key);
     if(img){img.src=ev.target.result;img.style.display='block';}
     if(ico)ico.style.display='none';
-    if(aiBox)aiBox.style.display='block';
-    if(aiNum)aiNum.innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:6px"><div class="spin"></div>Liest...</div>';
-    fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:80,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:f.type||'image/jpeg',data:ev.target.result.split(',')[1]}},
-          {type:'text',text:'Extract ONLY the container number from this image. Reply with ONLY the number or digits. If not visible reply: NOT_FOUND'}
-        ]}]})
-    }).then(r=>r.json()).then(d=>{
-      const res=d.content?.[0]?.text?.trim()||'NOT_FOUND';
-      if(res==='NOT_FOUND'||res.length<2){if(aiNum)aiNum.textContent='Nicht erkannt';}
-      else{
-        if(aiNum)aiNum.textContent=res;
-        const inp=document.getElementById('cn-'+key);
-        if(inp)inp.value=res;
-        toast('Container #'+res,'g');
-      }
-    }).catch(()=>{if(aiNum)aiNum.textContent='Fehler';});
+    toast('Foto OK - Nummer pruefen','o');
+    setTimeout(()=>{const inp=document.getElementById('cn-'+key);if(inp){inp.select();inp.focus();}},200);
   };r.readAsDataURL(f);
 }
 
@@ -944,6 +954,7 @@ function sendMsg(){
 function goScr(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function fmtT(s){return[Math.floor(s/3600),Math.floor((s%3600)/60),s%60].map(x=>String(x).padStart(2,'0')).join(':');}
 let toastT;
+window.addEventListener("load",()=>{if(!restoreState()){/* fresh start */}});
 function toast(msg,t='g'){
   const el=document.getElementById('toast');
   el.textContent=msg;el.className='toast show t'+t;
