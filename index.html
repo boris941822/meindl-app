@@ -913,14 +913,15 @@ function startVoice(){
 function doTranslate(txt){
   const box=document.getElementById('transBox');const res=document.getElementById('transText');
   box.style.display='block';res.textContent='Prevodi...';
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
-      messages:[{role:'user',content:'Prevedi na njemacki samo prevod, bez komentara: '+txt}]
+  const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=de&dt=t&q='+encodeURIComponent(txt);
+  fetch(url)
+    .then(r=>r.json())
+    .then(d=>{
+      const translated=d[0].map(x=>x[0]).join('');
+      res.textContent=translated;
+      toast('Prevod gotov','g');
     })
-  }).then(r=>r.json()).then(d=>{
-    res.textContent=d.content?.[0]?.text?.trim()||'';toast('Prevod gotov','g');
-  }).catch(()=>{res.textContent='Fehler';});
+    .catch(()=>{res.textContent='Prijevod nije dostupan';});
 }
 document.addEventListener('input',e=>{
   if(e.target.id!=='probText')return;
