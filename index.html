@@ -283,6 +283,56 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
 /* SECTION */
 .shdr{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:10px;}
+
+/* ACTIVE ACTION SCREEN COLORS */
+#s-orders.act-wait { background: #fff7ed !important; }
+#s-orders.act-wait .top-bar { background: #f97316 !important; border-color: #ea580c !important; }
+#s-orders.act-wait .top-bar * { color: #fff !important; }
+#s-orders.act-pause { background: #eff6ff !important; }
+#s-orders.act-pause .top-bar { background: #2563eb !important; border-color: #1d4ed8 !important; }
+#s-orders.act-pause .top-bar * { color: #fff !important; }
+#s-orders.act-stau { background: #fef2f2 !important; }
+#s-orders.act-stau .top-bar { background: #dc2626 !important; border-color: #b91c1c !important; }
+#s-orders.act-stau .top-bar * { color: #fff !important; }
+#s-orders.act-clean { background: #fefce8 !important; }
+#s-orders.act-clean .top-bar { background: #ca8a04 !important; border-color: #a16207 !important; }
+#s-orders.act-clean .top-bar * { color: #fff !important; }
+.act-banner{display:none;padding:16px;font-size:20px;font-weight:900;text-align:center;letter-spacing:1px;border-bottom:3px solid rgba(0,0,0,0.15);cursor:pointer;}
+.act-banner.show{display:block;}
+#s-orders.act-wait .act-banner{background:#f97316;color:#fff;}
+#s-orders.act-pause .act-banner{background:#2563eb;color:#fff;}
+#s-orders.act-stau .act-banner{background:#dc2626;color:#fff;}
+#s-orders.act-clean .act-banner{background:#ca8a04;color:#fff;}
+
+/* CGCLIENT STYLE MENU - ORANGE MEINDL */
+.cgmenu{display:none;position:fixed;inset:0;z-index:300;flex-direction:column;}
+.cgmenu.open{display:flex;}
+.cgmenu-hdr{background:#f97316;padding:16px 16px 14px;display:flex;align-items:center;justify-content:space-between;}
+.cgmenu-hdr-title{font-size:20px;font-weight:900;color:#fff;letter-spacing:0.5px;}
+.cgmenu-hdr-x{background:rgba(0,0,0,0.2);color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:15px;font-weight:800;cursor:pointer;}
+.cgmenu-list{background:#fff;flex:1;overflow-y:auto;}
+.cgmenu-row{display:flex;align-items:center;gap:14px;padding:20px 16px;border-bottom:1px solid #e5e7eb;cursor:pointer;transition:background 0.1s;}
+.cgmenu-row:active{background:#f3f4f6;}
+.cgmenu-row-icon{font-size:28px;width:36px;text-align:center;flex-shrink:0;}
+.cgmenu-row-text{font-size:17px;font-weight:700;color:#111;}
+.cgmenu-row-sub{font-size:12px;color:#6b7280;margin-top:2px;}
+.cgmenu-row.danger{background:#fef2f2;}
+.cgmenu-row.danger .cgmenu-row-text{color:#dc2626;}
+
+/* SUB SCREENS */
+.cgsub{display:none;position:fixed;inset:0;background:#fff;z-index:400;overflow-y:auto;}
+.cgsub.open{display:block;}
+.cgsub-hdr{background:#f97316;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;}
+.cgsub-back{background:rgba(0,0,0,0.2);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:14px;font-weight:800;cursor:pointer;}
+.cgsub-title{font-size:17px;font-weight:900;color:#fff;}
+.cgsub-body{padding:16px;}
+
+/* ZEIT GRID */
+.zeit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.zeit-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;}
+.zeit-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#6b7280;margin-bottom:6px;}
+.zeit-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;}
+
 </style>
 </head>
 <body>
@@ -385,12 +435,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       &#128172; <span data-t="nachrichten">Nachrichten</span>
       <span class="msg-badge" id="msgBadge">3</span>
     </button>
+    <button class="pill" onclick="openMenu()" style="background:var(--orange);color:#fff;border-color:var(--orange);">&#8942; Meniu</button>
     <div class="ctrl-bar" style="margin-left:auto;">
       <button class="lang-btn active" onclick="setLang('de')" style="font-size:10px;padding:3px 7px;">DE</button>
       <button class="lang-btn" onclick="setLang('sr')" style="font-size:10px;padding:3px 7px;">SR</button>
       <button class="lang-btn" onclick="setLang('en')" style="font-size:10px;padding:3px 7px;">EN</button>
     </div>
   </div>
+  <div class="act-banner" id="actBanner"></div>
   <div class="status-row">
     <div class="sdot sdot-g" id="sdot"></div>
     <div class="sinfo">
@@ -442,6 +494,122 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   <div class="fertig-bar" id="fertigBar">
     <button class="fertig-btn" onclick="auftragFertig()" data-t="fertig">AUFTRAG FERTIG</button>
     <button class="abbrech-bar-btn" onclick="openAbbrechBar()" data-t="abbrechen">Abbrechen</button>
+  </div>
+</div>
+
+<!-- CGCLIENT ORANGE MENU -->
+<div class="cgmenu" id="menuOverlay">
+  <div class="cgmenu-hdr">
+    <div class="cgmenu-hdr-title">Meniu</div>
+    <button class="cgmenu-hdr-x" onclick="closeMenu()">X</button>
+  </div>
+  <div class="cgmenu-list">
+    <div class="cgmenu-row" onclick="openSub('sub-zeit')">
+      <span class="cgmenu-row-icon">&#128336;</span>
+      <div><div class="cgmenu-row-text">Personalzeiterfassung</div><div class="cgmenu-row-sub">Arbeitszeit, Beginn, Auftraege</div></div>
+    </div>
+    <div class="cgmenu-row" onclick="openSub('sub-werk')">
+      <span class="cgmenu-row-icon">&#9888;</span>
+      <div><div class="cgmenu-row-text">Abfahrtskontrolle / Werkstatt</div><div class="cgmenu-row-sub">Problem am Fahrzeug melden</div></div>
+    </div>
+    <div class="cgmenu-row" onclick="openSub('sub-beifahrer')">
+      <span class="cgmenu-row-icon">&#128100;</span>
+      <div><div class="cgmenu-row-text">Beifahrer</div><div class="cgmenu-row-sub">Beifahrer ein- oder aussteigen</div></div>
+    </div>
+    <div class="cgmenu-row danger" onclick="openSub('sub-unfall')">
+      <span class="cgmenu-row-icon">&#128680;</span>
+      <div><div class="cgmenu-row-text">Unfall / Schaden melden</div><div class="cgmenu-row-sub">Sofortmeldung mit Foto und Uebersetzung</div></div>
+    </div>
+    <div class="cgmenu-row" onclick="doLogout()">
+      <span class="cgmenu-row-icon">&#128682;</span>
+      <div><div class="cgmenu-row-text">Abmelden</div><div class="cgmenu-row-sub">Tour beenden</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUB: ZEIT -->
+<div class="cgsub" id="sub-zeit">
+  <div class="cgsub-hdr">
+    <button class="cgsub-back" onclick="closeSub('sub-zeit')">&#8592;</button>
+    <div class="cgsub-title">Personalzeiterfassung</div>
+  </div>
+  <div class="cgsub-body">
+    <div class="zeit-grid" id="zeitCards"></div>
+  </div>
+</div>
+
+<!-- SUB: WERKSTATT -->
+<div class="cgsub" id="sub-werk">
+  <div class="cgsub-hdr">
+    <button class="cgsub-back" onclick="closeSub('sub-werk')">&#8592;</button>
+    <div class="cgsub-title">Werkstattmeldung</div>
+  </div>
+  <div class="cgsub-body">
+    <div class="lbl">Beschreibung - beliebige Sprache</div>
+    <div class="voice-row" style="margin-bottom:8px;">
+      <textarea class="finp" id="werkText" rows="3" style="flex:1;margin-bottom:0;" placeholder="Problem opisati - pisi na svom jeziku..."></textarea>
+      <button class="mic-btn" onclick="startVoiceField('werkText','transTextWerk','transBoxWerk')">&#127908;</button>
+    </div>
+    <div class="trans-box" id="transBoxWerk" style="margin-bottom:10px;">
+      <div class="trans-lbl">Ubersetzung DE</div>
+      <div class="trans-text" id="transTextWerk"></div>
+    </div>
+    <div class="foto-zone" onclick="document.getElementById('werkFoto').click()" style="margin-bottom:10px;">
+      <img id="werkFotoPreview" class="foto-prev">
+      <div id="werkFotoIcon" style="font-size:28px;margin-bottom:4px;">&#128247;</div>
+      <div style="font-size:12px;color:var(--text2);">Foto aufnehmen</div>
+    </div>
+    <input type="file" id="werkFoto" accept="image/*" capture="environment" style="display:none" onchange="handleGenFoto(event,'werkFotoPreview','werkFotoIcon')">
+    <button class="fbtn fb-red" onclick="submitWerk()">Problem absenden</button>
+    <button class="fbtn fb-ghost" onclick="closeSub('sub-werk')">Abbrechen</button>
+  </div>
+</div>
+
+<!-- SUB: BEIFAHRER -->
+<div class="cgsub" id="sub-beifahrer">
+  <div class="cgsub-hdr">
+    <button class="cgsub-back" onclick="closeSub('sub-beifahrer')">&#8592;</button>
+    <div class="cgsub-title">Beifahrer</div>
+  </div>
+  <div class="cgsub-body">
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-bottom:14px;" id="beifahrerStatus">
+      <div style="font-size:13px;font-weight:700;color:#16a34a;">Kein Beifahrer aktiv</div>
+    </div>
+    <div class="lbl">Name des Beifahrers</div>
+    <input class="inp" id="beifahrerName" placeholder="Vor- und Nachname..." style="margin-bottom:12px;">
+    <button class="fbtn fb-green" onclick="beifahrerEin()">&#128100; Beifahrer einsteigen</button>
+    <button class="fbtn fb-red" onclick="beifahrerAus()">Beifahrer aussteigen</button>
+    <button class="fbtn fb-ghost" onclick="closeSub('sub-beifahrer')">Zurueck</button>
+  </div>
+</div>
+
+<!-- SUB: UNFALL -->
+<div class="cgsub" id="sub-unfall">
+  <div class="cgsub-hdr" style="background:#dc2626;">
+    <button class="cgsub-back" onclick="closeSub('sub-unfall')">&#8592;</button>
+    <div class="cgsub-title">&#128680; Unfall / Schaden melden</div>
+  </div>
+  <div class="cgsub-body">
+    <div style="background:#fef2f2;border:2px solid #fecaca;border-radius:10px;padding:12px;margin-bottom:14px;font-size:13px;font-weight:700;color:#dc2626;">
+      Sofort Disponent benachrichtigen!
+    </div>
+    <div class="lbl">Beschreibung - beliebige Sprache</div>
+    <div class="voice-row" style="margin-bottom:8px;">
+      <textarea class="finp" id="unfallText" rows="3" style="flex:1;margin-bottom:0;" placeholder="Unfall opisati - pisi na svom jeziku..."></textarea>
+      <button class="mic-btn" onclick="startVoiceField('unfallText','transTextUnfall','transBoxUnfall')">&#127908;</button>
+    </div>
+    <div class="trans-box" id="transBoxUnfall" style="margin-bottom:10px;">
+      <div class="trans-lbl">Ubersetzung DE</div>
+      <div class="trans-text" id="transTextUnfall"></div>
+    </div>
+    <div class="foto-zone" onclick="document.getElementById('unfallFoto').click()" style="margin-bottom:10px;">
+      <img id="unfallFotoPreview" class="foto-prev">
+      <div id="unfallFotoIcon" style="font-size:28px;margin-bottom:4px;">&#128247;</div>
+      <div style="font-size:12px;color:var(--text2);">Schaden fotografieren</div>
+    </div>
+    <input type="file" id="unfallFoto" accept="image/*" capture="environment" style="display:none" onchange="handleGenFoto(event,'unfallFotoPreview','unfallFotoIcon')">
+    <button class="fbtn fb-red" onclick="submitUnfall()">&#128680; Unfall/Schaden absenden</button>
+    <button class="fbtn fb-ghost" onclick="closeSub('sub-unfall')">Abbrechen</button>
   </div>
 </div>
 
@@ -596,7 +764,7 @@ function doLogin(){
   if(!numVal){toast('Nummer eingeben','o');return;}
   const name=DRIVERS[numVal];
   if(!name){toast('Unbekannte Nummer: '+numVal,'r');numVal='';updND();return;}
-  S.driver=name;S.driverNum=numVal;
+  S.driver=name;S.driverNum=numVal;S.loginTime=new Date();S.loginTime=new Date();
   document.getElementById('drvAv').textContent=name[0];
   document.getElementById('drvName').textContent=name;
   document.getElementById('drvNum').textContent='Nr. '+numVal;
@@ -645,12 +813,26 @@ function startAct(t){
   document.getElementById(ACTS[t].id).classList.add('on');
   document.getElementById('sdot').className='sdot sdot-o';
   document.getElementById('sname').textContent=ACTS[t].lbl;
+  const scr=document.getElementById('s-orders');
+  scr.classList.remove('act-wait','act-pause','act-stau','act-clean');
+  scr.classList.add('act-'+t);
+  const banner=document.getElementById('actBanner');
+  const labels={wait:'WARTEN',pause:'PAUSE',stau:'STAU',clean:'REINIGEN'};
+  banner.textContent=labels[t]+' AKTIV — tippen zum Beenden';
+  banner.classList.add('show');
+  banner.onclick=()=>stopAct();
   clearInterval(actInt);
-  actInt=setInterval(()=>document.getElementById('stimer').textContent=fmtT(Math.floor((Date.now()-S.actStart)/1000)),1000);
+  actInt=setInterval(()=>{
+    document.getElementById('stimer').textContent=fmtT(Math.floor((Date.now()-S.actStart)/1000));
+    banner.textContent=labels[t]+' — '+fmtT(Math.floor((Date.now()-S.actStart)/1000))+' — tippen zum Beenden';
+  },1000);
 }
 function stopAct(){
   if(!S.activeAct)return;clearInterval(actInt);
   document.getElementById(ACTS[S.activeAct].id).classList.remove('on');
+  const scr=document.getElementById('s-orders');
+  scr.classList.remove('act-wait','act-pause','act-stau','act-clean');
+  document.getElementById('actBanner').classList.remove('show');
   S.activeAct=null;
   document.getElementById('sdot').className='sdot sdot-g';
   document.getElementById('sname').textContent=T[lang].bereit||'Bereit';
@@ -955,6 +1137,108 @@ function sendMsg(){
 function goScr(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function fmtT(s){return[Math.floor(s/3600),Math.floor((s%3600)/60),s%60].map(x=>String(x).padStart(2,'0')).join(':');}
 let toastT;
+
+// ===== MENU =====
+function openMenu(){
+  document.getElementById('menuOverlay').classList.add('open');
+}
+function closeMenu(){document.getElementById('menuOverlay').classList.remove('open');}
+function openSub(id){
+  if(id==='sub-zeit')renderZeit();
+  document.getElementById(id).classList.add('open');
+}
+function closeSub(id){document.getElementById(id).classList.remove('open');}
+
+function renderZeit(){
+  const now=new Date();
+  const loginTime=S.loginTime||now;
+  const worked=Math.floor((now-loginTime)/1000);
+  const done=ORDERS.filter(o=>o.status==='done').length;
+  document.getElementById('zeitCards').innerHTML=`
+    <div class="zeit-card"><div class="zeit-lbl">Arbeitsbeginn</div><div class="zeit-val" style="color:#f97316;">${loginTime.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</div></div>
+    <div class="zeit-card"><div class="zeit-lbl">Gearbeitet</div><div class="zeit-val" style="color:#16a34a;">${fmtT(worked)}</div></div>
+    <div class="zeit-card"><div class="zeit-lbl">Auftraege</div><div class="zeit-val" style="color:#2563eb;">${done} / ${ORDERS.length}</div></div>
+    <div class="zeit-card"><div class="zeit-lbl">Datum</div><div class="zeit-val" style="color:#111;font-size:14px;">${now.toLocaleDateString('de-DE')}</div></div>
+  `;
+}
+
+function handleGenFoto(e, previewId, iconId){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const prev=document.getElementById(previewId);
+    const ico=document.getElementById(iconId);
+    if(prev){prev.src=ev.target.result;prev.style.display='block';}
+    if(ico)ico.style.display='none';
+    toast('Foto OK','g');
+  };r.readAsDataURL(f);
+}
+
+function startVoiceField(textId, transId, boxId){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Mikrofon nur auf HTTPS','r');return;}
+  const rec=new SR();rec.lang='sr-RS';rec.continuous=false;rec.interimResults=false;
+  rec.onresult=e=>{
+    const txt=e.results[0][0].transcript;
+    document.getElementById(textId).value=txt;
+    doTranslateToEl(txt, transId, boxId);
+  };
+  rec.start();
+  toast('Govori...','o');
+}
+
+function doTranslateToEl(txt, transId, boxId){
+  const box=document.getElementById(boxId);const res=document.getElementById(transId);
+  if(box)box.style.display='block';if(res)res.textContent='Prevodi...';
+  const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=de&dt=t&q='+encodeURIComponent(txt);
+  fetch(url).then(r=>r.json()).then(d=>{
+    const t=d[0].map(x=>x[0]).join('');
+    if(res)res.textContent=t;toast('Prevod gotov','g');
+  }).catch(()=>{if(res)res.textContent='Prijevod nedostupan';});
+}
+
+function submitWerk(){
+  const txt=document.getElementById('werkText').value.trim();
+  if(!txt){toast('Bitte Beschreibung eingeben','o');return;}
+  toast('Werkstattmeldung gesendet','g');
+  document.getElementById('werkText').value='';
+  document.getElementById('transBoxWerk').style.display='none';
+  closeMenu();
+}
+
+function submitUnfall(){
+  const txt=document.getElementById('unfallText').value.trim();
+  if(!txt){toast('Bitte Beschreibung eingeben','o');return;}
+  toast('Unfall/Schaden gemeldet','r');
+  document.getElementById('unfallText').value='';
+  document.getElementById('transBoxUnfall').style.display='none';
+  closeMenu();
+}
+
+let beifahrer=null;
+function beifahrerEin(){
+  const name=document.getElementById('beifahrerName').value.trim();
+  if(!name){toast('Name eingeben','o');return;}
+  beifahrer={name,time:new Date()};
+  document.getElementById('beifahrerStatus').textContent=name+' - eingestiegen '+beifahrer.time.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('beifahrerStatus').style.color='var(--green)';
+  toast(name+' eingestiegen','g');
+}
+function beifahrerAus(){
+  if(!beifahrer){toast('Kein Beifahrer aktiv','o');return;}
+  const aus=new Date();
+  document.getElementById('beifahrerStatus').textContent=beifahrer.name+' - ausgestiegen '+aus.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('beifahrerStatus').style.color='var(--text2)';
+  toast(beifahrer.name+' ausgestiegen','o');
+  beifahrer=null;
+}
+
+// auto-translate in menu text areas
+document.addEventListener('input',e=>{
+  if(e.target.id==='werkText'){clearTimeout(transTimer);if(e.target.value.length>5)transTimer=setTimeout(()=>doTranslateToEl(e.target.value,'transTextWerk','transBoxWerk'),2000);}
+  if(e.target.id==='unfallText'){clearTimeout(transTimer);if(e.target.value.length>5)transTimer=setTimeout(()=>doTranslateToEl(e.target.value,'transTextUnfall','transBoxUnfall'),2000);}
+});
+
 window.addEventListener("load",()=>{if(!restoreState()){/* fresh start */}});
 function toast(msg,t='g'){
   const el=document.getElementById('toast');
