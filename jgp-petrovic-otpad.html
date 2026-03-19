@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JGP Petrović Otpad – Vajska</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --white: #ffffff;
+    --off: #f5f7f4;
+    --light: #eaefe8;
+    --green: #2e7d32;
+    --green2: #43a047;
+    --green3: #e8f5e9;
+    --grey: #607060;
+    --grey2: #3a4a3a;
+    --dark: #1a241a;
+    --border: #d4ddd2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--white); color: var(--dark); font-family: 'Source Sans 3', sans-serif; overflow-x: hidden; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(255,255,255,0.97); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 3rem; height: 68px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  }
+  .nav-logo {
+    font-family: 'Oswald', sans-serif; font-size: 1.3rem; font-weight: 700;
+    letter-spacing: 3px; color: var(--dark); text-transform: uppercase;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; display: inline-block; }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a { color: var(--grey); text-decoration: none; font-size: 0.82rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--green); }
+  .nav-cta { background: var(--green) !important; color: white !important; padding: 0.5rem 1.2rem; }
+  .nav-cta:hover { background: var(--green2) !important; color: white !important; }
+
+  .hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding-top: 68px; overflow: hidden; }
+  .hero-left { padding: 6rem 4rem 6rem 5rem; display: flex; flex-direction: column; justify-content: center; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--green3); color: var(--green);
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    padding: 0.4rem 1rem; border-radius: 100px; margin-bottom: 2rem; width: fit-content;
+    animation: fadeUp 0.5s ease both;
+  }
+  .hero h1 {
+    font-family: 'Oswald', sans-serif; font-size: clamp(2.8rem, 5vw, 5rem);
+    font-weight: 700; line-height: 1; text-transform: uppercase; color: var(--dark);
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+  .hero h1 .green { color: var(--green); }
+  .hero-sub { margin-top: 1.5rem; font-size: 1.05rem; color: var(--grey); line-height: 1.75; max-width: 420px; animation: fadeUp 0.5s 0.2s ease both; }
+  .hero-actions { margin-top: 2.5rem; display: flex; gap: 1rem; flex-wrap: wrap; animation: fadeUp 0.5s 0.3s ease both; }
+  .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.9rem 2rem; font-family: 'Oswald', sans-serif; font-size: 0.95rem; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: var(--green2); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(46,125,50,0.3); }
+  .btn-outline { background: transparent; color: var(--dark); border: 2px solid var(--border); }
+  .btn-outline:hover { border-color: var(--green); color: var(--green); transform: translateY(-2px); }
+
+  .hero-right { height: 100vh; position: relative; overflow: hidden; }
+  .hero-right img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.8) saturate(0.85); }
+  .hero-right::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, white 0%, transparent 25%); }
+  .hero-img-badge {
+    position: absolute; bottom: 3rem; right: 2rem; z-index: 2;
+    background: white; padding: 1.2rem 1.5rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12); border-left: 4px solid var(--green);
+  }
+  .hero-img-badge .num { font-family: 'Oswald', sans-serif; font-size: 2rem; font-weight: 700; color: var(--green); line-height: 1; }
+  .hero-img-badge .lbl { font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); margin-top: 0.2rem; }
+
+  .ticker { background: var(--green); padding: 0.9rem 0; overflow: hidden; white-space: nowrap; }
+  .ticker-inner { display: inline-block; animation: ticker 25s linear infinite; }
+  .ticker span { display: inline-block; color: white; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; padding: 0 3rem; }
+  .ticker span::before { content: '✦ '; color: rgba(255,255,255,0.5); }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  .section { padding: 6rem 5rem; max-width: 1200px; margin: 0 auto; }
+  .section-tag { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--green); font-weight: 600; margin-bottom: 0.75rem; }
+  .section-title { font-family: 'Oswald', sans-serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; text-transform: uppercase; color: var(--dark); line-height: 1; margin-bottom: 0; }
+
+  .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 3rem; }
+  .service-card { background: var(--off); border: 1px solid var(--border); padding: 2.5rem 2rem; position: relative; overflow: hidden; transition: all 0.25s; }
+  .service-card:hover { background: white; border-color: var(--green); box-shadow: 0 15px 50px rgba(46,125,50,0.1); transform: translateY(-4px); }
+  .service-card .s-num { position: absolute; top: 1.5rem; right: 1.5rem; font-family: 'Oswald', sans-serif; font-size: 3rem; font-weight: 700; color: var(--light); line-height: 1; transition: color 0.25s; }
+  .service-card:hover .s-num { color: var(--green3); }
+  .service-icon { font-size: 2.2rem; margin-bottom: 1.2rem; }
+  .service-card h3 { font-family: 'Oswald', sans-serif; font-size: 1.15rem; letter-spacing: 1px; text-transform: uppercase; color: var(--dark); margin-bottom: 0.75rem; }
+  .service-card p { font-size: 0.9rem; color: var(--grey); line-height: 1.65; }
+
+  .materials-bg { background: var(--off); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 6rem 5rem; }
+  .materials-bg > .inner { max-width: 1200px; margin: 0 auto; }
+  .materials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; margin-top: 3rem; }
+  .mat-chip { background: white; border: 1px solid var(--border); padding: 1.5rem 1rem; text-align: center; transition: all 0.2s; cursor: default; }
+  .mat-chip:hover { border-color: var(--green); background: var(--green3); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(46,125,50,0.12); }
+  .mat-chip .icon { font-size: 1.7rem; margin-bottom: 0.6rem; }
+  .mat-chip span { display: block; font-family: 'Oswald', sans-serif; font-size: 0.82rem; letter-spacing: 1px; text-transform: uppercase; color: var(--grey2); }
+
+  .gallery-section { padding: 6rem 5rem; max-width: 1200px; margin: 0 auto; }
+  .gallery-grid { display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: 280px 280px; gap: 8px; margin-top: 3rem; }
+  .g1 { grid-column: span 7; grid-row: span 2; }
+  .g2 { grid-column: span 5; }
+  .g3 { grid-column: span 5; }
+  .gallery-item { overflow: hidden; position: relative; background: var(--light); }
+  .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; filter: saturate(0.85); }
+  .gallery-item:hover img { transform: scale(1.06); }
+  .gallery-item .caption { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(26,36,26,0.85), transparent); padding: 1.5rem 1.2rem 1rem; font-family: 'Oswald', sans-serif; font-size: 0.85rem; letter-spacing: 1.5px; text-transform: uppercase; color: white; opacity: 0; transition: opacity 0.3s; }
+  .gallery-item:hover .caption { opacity: 1; }
+
+  .kontakt-bg { background: var(--grey2); padding: 6rem 5rem; }
+  .kontakt-bg > .inner { max-width: 1200px; margin: 0 auto; }
+  .kontakt-bg .section-tag { color: #81c784; }
+  .kontakt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; margin-top: 3.5rem; }
+  .contact-cards { display: flex; flex-direction: column; gap: 1.5rem; }
+  .contact-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; display: flex; gap: 1.2rem; align-items: center; transition: background 0.2s; }
+  .contact-card:hover { background: rgba(255,255,255,0.1); }
+  .cc-icon { width: 50px; height: 50px; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+  .contact-card h4 { font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 0.3rem; }
+  .contact-card p, .contact-card a { font-size: 1.05rem; color: white; text-decoration: none; font-weight: 600; }
+  .contact-card a:hover { color: #81c784; }
+
+  .cta-box { background: var(--green); padding: 3rem; display: flex; flex-direction: column; justify-content: center; gap: 1.5rem; }
+  .cta-box h3 { font-family: 'Oswald', sans-serif; font-size: 2rem; font-weight: 700; text-transform: uppercase; color: white; line-height: 1.1; }
+  .cta-box p { color: rgba(255,255,255,0.8); line-height: 1.65; }
+  .btn-white { background: white; color: var(--green); padding: 1rem 2rem; font-family: 'Oswald', sans-serif; font-size: 1rem; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; width: fit-content; transition: all 0.2s; font-weight: 700; }
+  .btn-white:hover { background: var(--dark); color: white; }
+
+  footer { background: var(--dark); padding: 2rem 5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .footer-logo { font-family: 'Oswald', sans-serif; font-size: 1.1rem; letter-spacing: 3px; text-transform: uppercase; color: white; }
+  .footer-logo span { color: #81c784; }
+  footer p { font-size: 0.78rem; letter-spacing: 1px; color: rgba(255,255,255,0.35); text-align: center; }
+  footer a { color: #81c784; text-decoration: none; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 6rem 1.5rem 3rem; }
+    .section, .gallery-section { padding: 4rem 1.5rem; }
+    .materials-bg, .kontakt-bg { padding: 4rem 1.5rem; }
+    footer { padding: 2rem 1.5rem; flex-direction: column; text-align: center; }
+    .services-grid { grid-template-columns: 1fr; }
+    .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+    .g1 { grid-column: span 2; }
+    .g2, .g3 { grid-column: span 1; }
+    .kontakt-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .nav-links { display: none; }
+    nav { padding: 0 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><span class="dot"></span> JGP Petrović</div>
+  <ul class="nav-links">
+    <li><a href="#usluge">Usluge</a></li>
+    <li><a href="#materijali">Materijali</a></li>
+    <li><a href="#galerija">Galerija</a></li>
+    <li><a href="#kontakt" class="nav-cta">Kontakt</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-badge">♻️ Vajska, Srbija</div>
+    <h1>Otkup<br><span class="green">Otpada</span><br>& Sirovina</h1>
+    <p class="hero-sub">Profesionalni otkup sekundarnih sirovina, građevinskog materijala i soje. Dolazimo na adresu, gotovinska isplata odmah.</p>
+    <div class="hero-actions">
+      <a href="tel:+38121775011" class="btn btn-green">📞 +381 21 775 011</a>
+      <a href="#usluge" class="btn btn-outline">Naše usluge →</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=900&q=80" alt="Reciklažno dvorište" />
+    <div class="hero-img-badge">
+      <div class="num">24/7</div>
+      <div class="lbl">Dostupni smo</div>
+    </div>
+  </div>
+</div>
+
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>Otkup metala</span><span>Bakar · Mesing · Aluminijum</span><span>Bijela tehnika</span><span>Građevinski materijal</span><span>Šljunak · Pesak · Cement</span><span>Otkup soje</span><span>Besplatan odvoz</span><span>Gotovinska isplata</span>
+    <span>Otkup metala</span><span>Bakar · Mesing · Aluminijum</span><span>Bijela tehnika</span><span>Građevinski materijal</span><span>Šljunak · Pesak · Cement</span><span>Otkup soje</span><span>Besplatan odvoz</span><span>Gotovinska isplata</span>
+  </div>
+</div>
+
+<div id="usluge">
+  <div class="section">
+    <div class="section-tag">— Čime se bavimo</div>
+    <h2 class="section-title">Naše usluge</h2>
+    <div class="services-grid">
+      <div class="service-card"><span class="s-num">01</span><div class="service-icon">🔩</div><h3>Otkup sekundarnih sirovina</h3><p>Otkupljujemo sve vrste metalnog otpada — gvožđe, bakar, mesing, aluminijum, nehrđajući čelik. Poštene cijene, isplata odmah.</p></div>
+      <div class="service-card"><span class="s-num">02</span><div class="service-icon">🏗️</div><h3>Građevinski materijal</h3><p>Prodaja i otkup građevinskog materijala — šljunak, pesak, cement, cigla. Dostava na gradilište.</p></div>
+      <div class="service-card"><span class="s-num">03</span><div class="service-icon">🚛</div><h3>Transport i odvoz</h3><p>Dolazimo na vašu adresu sa opremljenim kamionima i kran-pincama. Brz odvoz bez problema.</p></div>
+      <div class="service-card"><span class="s-num">04</span><div class="service-icon">📦</div><h3>Bijela tehnika</h3><p>Otkup starih kućnih aparata — frižideri, veš mašine, šporeti, klima uređaji i ostalo.</p></div>
+      <div class="service-card"><span class="s-num">05</span><div class="service-icon">🌾</div><h3>Otkup soje</h3><p>Otkupljujemo soju direktno od poljoprivrednika. Povoljne tržišne cijene, brza gotovinska isplata.</p></div>
+      <div class="service-card"><span class="s-num">06</span><div class="service-icon">♻️</div><h3>Reciklaža</h3><p>Ekološki odgovorno zbrinjavanje svih vrsta sekundarnih sirovina u skladu sa propisima.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="materials-bg" id="materijali">
+  <div class="inner">
+    <div class="section-tag">— Šta otkupljujemo</div>
+    <h2 class="section-title">Materijali</h2>
+    <div class="materials-grid">
+      <div class="mat-chip"><div class="icon">🔴</div><span>Bakar</span></div>
+      <div class="mat-chip"><div class="icon">🟡</div><span>Mesing</span></div>
+      <div class="mat-chip"><div class="icon">⚪</div><span>Aluminijum</span></div>
+      <div class="mat-chip"><div class="icon">⚫</div><span>Gvožđe</span></div>
+      <div class="mat-chip"><div class="icon">🔵</div><span>Inox čelik</span></div>
+      <div class="mat-chip"><div class="icon">📺</div><span>Bijela tehnika</span></div>
+      <div class="mat-chip"><div class="icon">🪨</div><span>Šljunak</span></div>
+      <div class="mat-chip"><div class="icon">🏖️</div><span>Pesak</span></div>
+      <div class="mat-chip"><div class="icon">🏗️</div><span>Cement</span></div>
+      <div class="mat-chip"><div class="icon">🌱</div><span>Soja</span></div>
+      <div class="mat-chip"><div class="icon">🔌</div><span>Kablovi</span></div>
+      <div class="mat-chip"><div class="icon">🪣</div><span>Bave</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="galerija">
+  <div class="gallery-section">
+    <div class="section-tag">— Naša oprema i dvorište</div>
+    <h2 class="section-title">Galerija</h2>
+    <div class="gallery-grid">
+      <div class="gallery-item g1">
+        <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&q=80" alt="Reciklažno dvorište" />
+        <div class="caption">Reciklažno dvorište</div>
+      </div>
+      <div class="gallery-item g2">
+        <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80" alt="Kamion s dizalicom" />
+        <div class="caption">Transport i odvoz</div>
+      </div>
+      <div class="gallery-item g3">
+        <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600&q=80" alt="Gradjevinski materijal" />
+        <div class="caption">Građevinski materijal</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="kontakt-bg" id="kontakt">
+  <div class="inner">
+    <div class="section-tag">— Stupite u kontakt</div>
+    <h2 class="section-title" style="color:white; margin-bottom:0;">Kontaktirajte nas</h2>
+    <div class="kontakt-grid">
+      <div class="contact-cards">
+        <div class="contact-card"><div class="cc-icon">📞</div><div><h4>Telefon</h4><a href="tel:+38121775011">+381 21 775 011</a></div></div>
+        <div class="contact-card"><div class="cc-icon">📍</div><div><h4>Lokacija</h4><p>Vajska, Srbija</p></div></div>
+        <div class="contact-card"><div class="cc-icon">🕐</div><div><h4>Radno vrijeme</h4><p>Pon–Sub: 07:00–18:00</p></div></div>
+        <div class="contact-card"><div class="cc-icon">💵</div><div><h4>Isplata</h4><p>Gotovina — odmah na licu mjesta</p></div></div>
+      </div>
+      <div class="cta-box">
+        <h3>Imate otpad?<br>Pozovite nas!</h3>
+        <p>Dolazimo na vašu adresu, procjenjujemo materijal i isplaćujemo gotovinom odmah. Brzo, jednostavno, bez komplikacija.</p>
+        <a href="tel:+38121775011" class="btn-white">📞 Pozovite sada</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">JGP <span>Petrović</span> Otpad</div>
+  <p>Vajska, Srbija · Tel: <a href="tel:+38121775011">+381 21 775 011</a></p>
+  <p style="color:rgba(255,255,255,0.2);">© 2026 JGP Petrović</p>
+</footer>
+
+</body>
+</html>
